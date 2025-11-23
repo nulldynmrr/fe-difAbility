@@ -73,7 +73,7 @@ export default function Login() {
             perusahaan yang peduli aksesibilitas
           </p>
 
-          <div className="space-y-4 w-full max-w-md">
+          <div className="space-y-2 w-full max-w-md">
             <Input
               id="email"
               label="Email"
@@ -101,6 +101,15 @@ export default function Login() {
             >
               Masuk
             </Button>
+            <p className="text-text-secondary text-center mt-2">
+              Belum punya Akun?{" "}
+              <a
+                className="text-primary-300 font-semibold"
+                href="/registration"
+              >
+                Daftar
+              </a>
+            </p>
           </div>
         </div>
       </div>
