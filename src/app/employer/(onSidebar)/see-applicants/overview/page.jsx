@@ -64,7 +64,13 @@ export default function CandidateOverview() {
         </div>
         {/* Illustration - simplified representation */}
         <div className="absolute right-8 top-4 w-48 h-48 opacity-30">
-          <svg viewBox="0 0 200 200" className="w-full h-full text-white" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            viewBox="0 0 200 200"
+            className="w-full h-full text-white"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             {/* Person in wheelchair with laptop */}
             <circle cx="60" cy="140" r="25" />
             <rect x="35" y="120" width="50" height="30" rx="5" />
@@ -83,7 +89,9 @@ export default function CandidateOverview() {
 
       {/* Detail Kandidat Section */}
       <div className="bg-card rounded-lg shadow-md border border-gray-200 p-6">
-        <h1 className="text-2xl font-bold text-text-primary mb-6">Detail Kandidat</h1>
+        <h1 className="text-2xl font-bold text-text-primary mb-6">
+          Detail Kandidat
+        </h1>
 
         {/* Candidate Profile */}
         <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-200">
@@ -91,20 +99,28 @@ export default function CandidateOverview() {
             <span className="text-xl font-medium text-text-primary">P</span>
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-text-primary">{candidateData.name}</h2>
+            <h2 className="text-lg font-semibold text-text-primary">
+              {candidateData.name}
+            </h2>
             <p className="text-sm text-text-secondary">{candidateData.email}</p>
           </div>
         </div>
 
         {/* Deskripsi Kandidat */}
         <div className="mb-6">
-          <h3 className="text-lg font-bold text-text-primary mb-3">Deskripsi Kandidat</h3>
-          <p className="text-text-secondary leading-relaxed">{candidateData.description}</p>
+          <h3 className="text-lg font-bold text-text-primary mb-3">
+            Deskripsi Kandidat
+          </h3>
+          <p className="text-text-secondary leading-relaxed">
+            {candidateData.description}
+          </p>
         </div>
 
         {/* Tipe Pekerjaan */}
         <div className="mb-6">
-          <h3 className="text-lg font-bold text-text-primary mb-3">Tipe Pekerjaan</h3>
+          <h3 className="text-lg font-bold text-text-primary mb-3">
+            Tipe Pekerjaan
+          </h3>
           <div className="flex flex-wrap gap-2">
             {candidateData.jobTypes.map((jobType, index) => (
               <span
@@ -134,13 +150,17 @@ export default function CandidateOverview() {
 
         {/* Education */}
         <div className="mb-6">
-          <h3 className="text-lg font-bold text-text-primary mb-3">Education</h3>
+          <h3 className="text-lg font-bold text-text-primary mb-3">
+            Education
+          </h3>
           <p className="text-text-secondary">{candidateData.education}</p>
         </div>
 
         {/* Pengalaman */}
         <div className="mb-6">
-          <h3 className="text-lg font-bold text-text-primary mb-3">Pengalaman</h3>
+          <h3 className="text-lg font-bold text-text-primary mb-3">
+            Pengalaman
+          </h3>
           <div className="space-y-3">
             {candidateData.experiences.map((exp, index) => (
               <div
@@ -150,7 +170,9 @@ export default function CandidateOverview() {
                 <div className="font-semibold text-text-primary mb-2">
                   {exp.position} - {exp.company}
                 </div>
-                <div className="text-sm text-text-secondary mb-2">{exp.dateRange}</div>
+                <div className="text-sm text-text-secondary mb-2">
+                  {exp.dateRange}
+                </div>
                 <ul className="list-disc list-inside text-sm text-text-secondary space-y-1">
                   <li>{exp.job1}</li>
                   <li>{exp.job2}</li>
@@ -164,14 +186,22 @@ export default function CandidateOverview() {
         <div className="mb-6">
           <h3 className="text-lg font-bold text-text-primary mb-2">CV</h3>
           <p className="text-text-secondary">{candidateData.cvName}</p>
-          <p className="text-sm text-text-secondary">{candidateData.cvUpdateDate}</p>
+          <p className="text-sm text-text-secondary">
+            {candidateData.cvUpdateDate}
+          </p>
         </div>
 
         {/* Sertifikasi */}
         <div className="mb-6">
-          <h3 className="text-lg font-bold text-text-primary mb-2">Sertikasi</h3>
-          <p className="text-text-secondary">{candidateData.certificationName}</p>
-          <p className="text-sm text-text-secondary">{candidateData.certificationUpdateDate}</p>
+          <h3 className="text-lg font-bold text-text-primary mb-2">
+            Sertikasi
+          </h3>
+          <p className="text-text-secondary">
+            {candidateData.certificationName}
+          </p>
+          <p className="text-sm text-text-secondary">
+            {candidateData.certificationUpdateDate}
+          </p>
         </div>
 
         {/* Action Buttons */}

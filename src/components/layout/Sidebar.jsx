@@ -3,19 +3,15 @@
 import * as React from "react";
 import {
   LayoutDashboard,
-  Users,
-  CalendarDays,
-  Newspaper,
-  Briefcase,
-  Users2,
+  Search,
+  FileText,
+  Bell,
   MessageSquare,
-  Handshake,
-  Settings,
-  Megaphone,
+  Briefcase,
+  Users,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
-import { NavProjects } from "@/components/nav-projects";
 import { NavUser } from "@/components/nav-user";
 import { TeamSwitcher } from "@/components/team-switcher";
 import {
@@ -27,112 +23,91 @@ import {
   SidebarProvider,
 } from "@/components/ui/sidebar";
 
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+export const sidebarData = {
+  pencariKerja: {
+    user: {
+      name: "shadcn",
+      email: "m@example.com",
+      avatar: "/avatars/shadcn.jpg",
+    },
+    teams: [
+      {
+        name: "Pencari Kerja",
+        logo: "/assets/logo-humic-pesergi.png",
+        plan: "User",
+      },
+    ],
+    navMain: [
+      {
+        title: "Platform",
+        items: [
+          {
+            title: "Dashboard",
+            url: "/pencari/dashboard",
+            icon: LayoutDashboard,
+          },
+          { title: "Cari Lowongan", url: "/pencari/lowongan", icon: Search },
+          { title: "Lamaran Saya", url: "/pencari/lamaran", icon: FileText },
+          { title: "Notifikasi", url: "/pencari/notifikasi", icon: Bell },
+        ],
+      },
+      {
+        title: "Approved Job",
+        items: [
+          { title: "Chat HRD", url: "/pencari/chat", icon: MessageSquare },
+        ],
+      },
+    ],
   },
-  teams: [
-    {
-      name: "Humic Centered",
-      logo: "/assets/logo-humic-pesergi.png",
-      plan: "Admin Dashboard",
+
+  pemberiKerja: {
+    user: {
+      name: "shadcn",
+      email: "m@example.com",
+      avatar: "/avatars/shadcn.jpg",
     },
-  ],
-  navMain: [
-    {
-      title: "General",
-      items: [
-        {
-          title: "Dashboard",
-          url: "dashboard",
-          icon: LayoutDashboard,
-          isActive: true,
-        },
-        {
-          title: "Users Admin",
-          url: "users-admin",
-          icon: Users,
-        },
-      ],
-    },
-    {
-      title: "Pages",
-      items: [
-        {
-          title: "Agenda",
-          url: "agenda-overview",
-          icon: CalendarDays,
-        },
-        {
-          title: "Berita",
-          url: "berita-overview",
-          icon: Newspaper,
-        },
-        {
-          title: "Pengumuman",
-          url: "pengumuman-overview",
-          icon: Megaphone,
-        },
-        {
-          title: "Internship Project",
-          url: "internship-project-overview",
-          icon: Briefcase,
-        },
-        {
-          title: "Staffs",
-          url: "staffs-overview",
-          icon: Users,
-        },
-        {
-          title: "Intern",
-          url: "teams-overview",
-          icon: Users2,
-        },
-        {
-          title: "Testimoni",
-          url: "testimoni-overview",
-          icon: MessageSquare,
-        },
-        {
-          title: "Partnership",
-          url: "partnership-overview",
-          icon: Handshake,
-        },
-      ],
-    },
-    {
-      title: "Other",
-      items: [
-        {
-          title: "Banner",
-          url: "banner-overview",
-          icon: Megaphone,
-        },
-        {
-          title: "Settings",
-          url: "settings",
-          icon: Settings,
-        },
-      ],
-    },
-  ],
+    teams: [
+      {
+        name: "Pemberi Kerja",
+        logo: "/assets/logo-humic-pesergi.png",
+        plan: "Employer",
+      },
+    ],
+    navMain: [
+      {
+        title: "Platform",
+        items: [
+          {
+            title: "Dashboard",
+            url: "/pemberi/dashboard",
+            icon: LayoutDashboard,
+          },
+          {
+            title: "Posting Lowongan Baru",
+            url: "/pemberi/posting",
+            icon: Briefcase,
+          },
+          {
+            title: "Daftar Kandidat Saya",
+            url: "/pemberi/kandidat",
+            icon: Users,
+          },
+          { title: "Notifikasi", url: "/pemberi/notifikasi", icon: Bell },
+        ],
+      },
+    ],
+  },
 };
 
-export function AppSidebar({ ...props }) {
+export function SidebarPencariKerja(props) {
+  const data = sidebarData.pencariKerja;
+
   return (
     <SidebarProvider>
       <Sidebar
         collapsible="icon"
         {...props}
-        className="border-r   
-        bg-white 
-        dark:bg-[#1f1f1f] 
-          border 
-        border-black/10 
-        dark:border-white/10  
-          backdrop-blur-md"
+        className="border-r bg-bg-card border-primary-50 dark:border-primary-100 backdrop-blur-md"
       >
         <SidebarHeader className="px-4 pt-4">
           <TeamSwitcher teams={data.teams} />
@@ -146,7 +121,35 @@ export function AppSidebar({ ...props }) {
           <NavUser user={data.user} />
         </SidebarFooter>
 
-        <SidebarRail />
+        <SidebarRail className="bg-bg-card border-l border-primary-50 dark:border-primary-100" />
+      </Sidebar>
+    </SidebarProvider>
+  );
+}
+
+export function SidebarPemberiKerja(props) {
+  const data = sidebarData.pemberiKerja;
+
+  return (
+    <SidebarProvider>
+      <Sidebar
+        collapsible="icon"
+        {...props}
+        className="border-r bg-bg-card border-primary-50 dark:border-primary-100 backdrop-blur-md"
+      >
+        <SidebarHeader className="px-4 pt-4">
+          <TeamSwitcher teams={data.teams} />
+        </SidebarHeader>
+
+        <SidebarContent className="px-2">
+          <NavMain items={data.navMain} />
+        </SidebarContent>
+
+        <SidebarFooter className="px-4 pb-4">
+          <NavUser user={data.user} />
+        </SidebarFooter>
+
+        <SidebarRail className="bg-bg-card border-l border-primary-50 dark:border-primary-100" />
       </Sidebar>
     </SidebarProvider>
   );

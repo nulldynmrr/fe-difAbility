@@ -62,7 +62,13 @@ export default function SeeApplicants() {
         </div>
         {/* Illustration - simplified representation */}
         <div className="absolute right-8 top-4 w-48 h-48 opacity-30">
-          <svg viewBox="0 0 200 200" className="w-full h-full text-white" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            viewBox="0 0 200 200"
+            className="w-full h-full text-white"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             {/* Person in wheelchair with laptop */}
             <circle cx="60" cy="140" r="25" />
             <rect x="35" y="120" width="50" height="30" rx="5" />
@@ -87,7 +93,9 @@ export default function SeeApplicants() {
             <span className="text-2xl font-bold text-primary-300">UI</span>
           </div>
           <div>
-            <h3 className="text-2xl font-bold text-text-primary">UI Designer</h3>
+            <h3 className="text-2xl font-bold text-text-primary">
+              UI Designer
+            </h3>
           </div>
         </div>
 

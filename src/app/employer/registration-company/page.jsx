@@ -93,7 +93,7 @@ const RegisterCompany = () => {
           </div>
         </div>
 
-        <form className="bg-card rounded-lg border-0 p-8">
+        <form className="bg-bg-card rounded-lg border-0 p-8">
           <div className="mb-8">
             <h3 className="text-xl font-bold text-text-primary mb-6">
               Daftar Perusahaan
