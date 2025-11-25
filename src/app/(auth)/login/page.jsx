@@ -1,36 +1,158 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import Image from "@/components/ui/Image";
 import { Accessibility } from "lucide-react";
+
+import Cookies from "js-cookie";
+import { toast } from "sonner";
+import request from "@/utils/request";
+import { z } from "zod";
+
 import { useSpeechGuide } from "@/hooks/speech/useSpeechGuide";
 import { useAccessibilityOptions } from "@/hooks/useAccessibilityOptions";
 
+const formSchema = z.object({
+  email: z.string().email("Format email tidak valid"),
+  password: z.string().min(6, "Password minimal 6 karakter"),
+});
+
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [validations, setValidations] = useState([]);
 
   const options = useAccessibilityOptions();
 
   useSpeechGuide(
     options.voiceAssistant
-      ? "Halo, kamu berada di halaman login. Silakan masukkan email kamu untuk masuk ke akun."
+      ? "Halo, kamu berada di halaman login. Silakan masukkan username dan password kamu."
       : null,
-    "#email",
+    "#username",
     options.voiceAssistant
   );
+  useEffect(() => {
+    const verify = searchParams.get("verify");
+    const message = searchParams.get("message");
 
-  const onLogin = () => {
+    if (verify === "success") {
+      toast.dismiss();
+      toast.success("Verifikasi email berhasil!");
+    } else if (message) {
+      toast.dismiss();
+      toast.error(message);
+    }
+
+    if (verify || message) {
+      const np = new URLSearchParams(searchParams.toString());
+      np.delete("verify");
+      np.delete("message");
+      router.replace(`?${np.toString()}`, { scroll: false });
+    }
+  }, [searchParams, router]);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const getValidationError = (field) => {
+    const err = validations.find((v) => v.name === field);
+    return err?.message;
+  };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setValidations([]);
+
     if (options.voiceAssistant) {
-      const u = new SpeechSynthesisUtterance("Sedang memproses login...");
+      const u = new SpeechSynthesisUtterance(
+        "Sedang memproses login. Mohon tunggu."
+      );
       u.lang = "id-ID";
       window.speechSynthesis.speak(u);
     }
-    alert("Login successful!");
+
+    try {
+      const validation = formSchema.safeParse(formData);
+      if (!validation.success) {
+        setValidations(
+          validation.error.issues.map((err) => ({
+            name: err.path[0],
+            message: err.message,
+          }))
+        );
+        toast.error("Input tidak valid");
+        setLoading(false);
+        return;
+      }
+
+      const res = await request.post("/admin/login", {
+        username: formData.username,
+        password: formData.password,
+      });
+
+      if (res.status === 200 || res.status === 201) {
+        const data = res.data;
+
+        if (data.token) {
+          Cookies.set("token", data.token, { expires: 1 });
+          toast.success("Login berhasil");
+
+          router.push("/administrator/dashboard");
+        } else {
+          toast.error("Token tidak diterima");
+        }
+      } else {
+        toast.error("Login gagal");
+      }
+
+      setLoading(false);
+    } catch (error) {
+      let msg = "";
+
+      if (error.response) {
+        const status = error.response.status;
+        const data = error.response.data;
+
+        if (status === 401) {
+          msg =
+            data?.errorAdminRouteL2 ||
+            data?.errorAdminRouteL3 ||
+            data?.message ||
+            "Username atau password salah";
+
+          if (msg.toLowerCase().includes("password")) {
+            setValidations([{ name: "password", message: msg }]);
+          } else {
+            setValidations([{ name: "username", message: msg }]);
+          }
+        } else if (status === 404) {
+          msg = "Akun tidak ditemukan";
+          setValidations([{ name: "username", message: msg }]);
+        } else if (status === 400) {
+          msg = data?.message || "Input tidak valid";
+        } else {
+          msg = data?.message || "Server error";
+        }
+      } else {
+        msg = "Network error";
+      }
+
+      toast.error(msg);
+      setLoading(false);
+    }
   };
 
   return (
@@ -73,34 +195,39 @@ export default function Login() {
             perusahaan yang peduli aksesibilitas
           </p>
 
-          <div className="space-y-2 w-full max-w-md">
+          <form onSubmit={onSubmit} className="space-y-2 w-full max-w-md">
             <Input
-              id="email"
-              label="Email"
-              placeholder="email kamu"
-              shortcutLabel="ctrl+e"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              id="username"
+              name="username"
+              label="Username"
+              placeholder="username kamu"
+              shortcutLabel="ctrl+u"
+              value={formData.username}
+              onChange={handleChange}
+              error={getValidationError("username")}
             />
 
             <Input
               id="password"
-              label="Password"
+              name="password"
               type="password"
+              label="Password"
               placeholder="kata sandi kamu"
               shortcutLabel="ctrl+p"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={formData.password}
+              onChange={handleChange}
+              error={getValidationError("password")}
             />
 
             <Button
               type="submit"
-              onClick={onLogin}
               className="mt-4 w-full py-2"
               shortcutLabel="enter"
+              loading={loading}
             >
               Masuk
             </Button>
+
             <p className="text-text-secondary text-center mt-2">
               Belum punya Akun?{" "}
               <a
@@ -110,7 +237,7 @@ export default function Login() {
                 Daftar
               </a>
             </p>
-          </div>
+          </form>
         </div>
       </div>
     </div>
