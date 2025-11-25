@@ -5,25 +5,48 @@ import { X, Type } from "lucide-react";
 import { applyTheme, getStoredOptions } from "@/lib/themes";
 
 export default function AccessibilityModal({ isOpen, onClose }) {
-  const storedOptions = getStoredOptions();
   const [options, setOptions] = useState({
-    ...storedOptions,
-    shortcuts: storedOptions.shortcuts ?? false,
-    showShortcutLabels: storedOptions.showShortcutLabels ?? false,
-    voiceAssistant: storedOptions.voiceAssistant ?? false,
+    theme: "default",
+    dyslexia: false,
+    fontSize: "default",
+    shortcuts: false,
+    showShortcutLabels: false,
+    voiceAssistant: false,
   });
 
   useEffect(() => {
-    if (isOpen) {
-      const latest = getStoredOptions();
-      setOptions({
-        ...latest,
-        shortcuts: latest.shortcuts ?? false,
-        showShortcutLabels: latest.showShortcutLabels ?? false,
-        voiceAssistant: latest.voiceAssistant ?? false,
-      });
-    }
+    const storedOptions = getStoredOptions();
+    setOptions({
+      theme: storedOptions.theme || "default",
+      dyslexia: storedOptions.dyslexia ?? false,
+      fontSize: storedOptions.fontSize || "default",
+      shortcuts: storedOptions.shortcuts ?? false,
+      showShortcutLabels: storedOptions.showShortcutLabels ?? false,
+      voiceAssistant: storedOptions.voiceAssistant ?? false,
+    });
   }, [isOpen]);
+
+  useEffect(() => {
+    const handleOptionsChange = () => {
+      const storedOptions = getStoredOptions();
+      setOptions({
+        theme: storedOptions.theme || "default",
+        dyslexia: storedOptions.dyslexia ?? false,
+        fontSize: storedOptions.fontSize || "default",
+        shortcuts: storedOptions.shortcuts ?? false,
+        showShortcutLabels: storedOptions.showShortcutLabels ?? false,
+        voiceAssistant: storedOptions.voiceAssistant ?? false,
+      });
+    };
+
+    window.addEventListener("accessibilityOptionsChanged", handleOptionsChange);
+    return () => {
+      window.removeEventListener(
+        "accessibilityOptionsChanged",
+        handleOptionsChange
+      );
+    };
+  }, []);
 
   if (!isOpen) return null;
 
@@ -83,7 +106,7 @@ export default function AccessibilityModal({ isOpen, onClose }) {
       }}
     >
       <div
-        className="absolute top-0 right-0 bottom-0 w-full sm:w-[600px] bg-card shadow-2xl border-l border-primary-50 flex flex-col focus:outline-none"
+        className="absolute top-0 right-0 bottom-0 w-full sm:w-[600px] bg-bg-card shadow-2xl border-l border-primary-50 flex flex-col focus:outline-none"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-6 border-b border-primary-50">
@@ -132,17 +155,19 @@ export default function AccessibilityModal({ isOpen, onClose }) {
                 <button
                   key={theme.value}
                   onClick={() => {
-                    const newOptions = { ...options, theme: theme.value };
+                    const newOptions = {
+                      ...options,
+                      theme: theme.value || "default",
+                    };
                     handleOptionChange(newOptions);
                   }}
                   role="radio"
-                  aria-checked={options.theme === theme.value}
-                  className={`w-full text-left p-4 rounded-xl border-2 transition-all focus:outline-none
-                    ${
-                      options.theme === theme.value
-                        ? "border-primary-100 bg-primary-200/10"
-                        : "border-gray-200 hover:border-primary-100"
-                    }`}
+                  aria-checked={(options.theme || "default") === theme.value}
+                  className={`w-full text-left p-4 rounded-xl border-2 transition-all focus:outline-none ${
+                    options.theme === theme.value
+                      ? "border-primary-100 bg-primary-200/10"
+                      : "border-border hover:border-primary-100"
+                  }`}
                 >
                   <span className="block text-lg font-semibold text-text-primary">
                     {theme.label}
@@ -154,6 +179,7 @@ export default function AccessibilityModal({ isOpen, onClose }) {
               ))}
             </div>
           </div>
+
           <div>
             <p className="text-base font-medium mb-3 text-text-secondary">
               Font Size
@@ -176,12 +202,11 @@ export default function AccessibilityModal({ isOpen, onClose }) {
                   }}
                   role="radio"
                   aria-checked={options.fontSize === size.value}
-                  className={`flex-1 flex items-center gap-2 p-4 rounded-xl border-2 transition-all focus:outline-none
-          ${
-            options.fontSize === size.value
-              ? "border-primary-100 bg-primary-200/10"
-              : "border-gray-200 hover:border-primary-100"
-          }`}
+                  className={`flex-1 flex items-center gap-2 p-4 rounded-xl border-2 transition-all focus:outline-none ${
+                    options.fontSize === size.value
+                      ? "border-primary-100 bg-primary-200/10"
+                      : "border-border hover:border-primary-100"
+                  }`}
                 >
                   <Type size={size.iconSize} className="text-text-primary" />
                   <span className="block text-lg font-semibold text-text-primary">
@@ -191,6 +216,7 @@ export default function AccessibilityModal({ isOpen, onClose }) {
               ))}
             </div>
           </div>
+
           <div>
             <label className="flex items-start gap-3 cursor-pointer">
               <input
@@ -257,7 +283,7 @@ export default function AccessibilityModal({ isOpen, onClose }) {
           </div>
         </div>
 
-        <div className="p-6 border-t border-gray-100">
+        <div className="p-6 border-t border-border">
           <p className="text-sm text-text-secondary text-center">@2025</p>
         </div>
       </div>

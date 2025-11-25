@@ -18,7 +18,6 @@ export default function DisabilityImage({
   const { theme, dyslexia } = useAccessibilityOptions();
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Hapus efek border
   useEffect(() => {
     if (theme === "high-contrast") {
       document.documentElement.style.removeProperty("--image-border");

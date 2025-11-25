@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Menu, X, Accessibility, User, Building } from "lucide-react";
+import { Menu, X, User, Building } from "lucide-react";
 
 const MenuNav = ({ isMobile = false, onClickLink }) => {
   const menuItems = [
@@ -37,8 +37,8 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="bg-card border-b border-gray-200 fixed w-full top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="bg-bg-card border-b border-border fixed w-full top-0 z-50">
+      <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <span className="text-2xl font-bold text-primary-300">disLok</span>
@@ -47,13 +47,6 @@ export default function Navbar() {
           <MenuNav />
 
           <div className="hidden md:flex items-center space-x-4">
-            <div className="flex items-center space-x-2 px-3 py-1.5 border border-primary-200 rounded-full">
-              <Accessibility className="text-primary-300 w-4 h-4" />
-              <span className="text-primary-300 text-sm font-semibold">
-                disability-friendly
-              </span>
-            </div>
-
             <a
               href="/login"
               className="flex items-center space-x-2 px-4 py-2 text-text-primary hover:text-primary-300 transition-colors font-medium"
@@ -88,11 +81,11 @@ export default function Navbar() {
       </div>
 
       {isOpen && (
-        <div className="md:hidden bg-card border-t border-gray-200">
+        <div className="md:hidden bg-bg-card border-t border-border">
           <div className="px-4 pt-2 pb-4">
             <MenuNav isMobile onClickLink={() => setIsOpen(false)} />
 
-            <div className="pt-3 border-t border-gray-200 space-y-2">
+            <div className="pt-3 border-t border-border space-y-2">
               <a
                 href="/login"
                 className="flex items-center space-x-2 px-3 py-2 text-text-primary hover:text-primary-300 hover:bg-primary-50 rounded-lg transition-colors font-medium"

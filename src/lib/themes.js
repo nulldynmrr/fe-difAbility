@@ -1,21 +1,36 @@
 export function applyTheme(options) {
   if (typeof window === "undefined") return;
 
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => applyTheme(options));
+    return;
+  }
+
+  if (!document.documentElement || !document.body) {
+    setTimeout(() => applyTheme(options), 10);
+    return;
+  }
+
   const root = document.documentElement;
   const body = document.body;
 
-  root.setAttribute("data-theme", options.theme || "default");
+  const theme = options?.theme || "default";
+  if (theme === "default") {
+    root.removeAttribute("data-theme");
+  } else {
+    root.setAttribute("data-theme", theme);
+  }
 
-  if (options.dyslexia) {
+  if (options?.dyslexia) {
     root.setAttribute("data-dyslexia", "true");
   } else {
     root.removeAttribute("data-dyslexia");
   }
 
-  const fontSize = options.fontSize || "default";
+  const fontSize = options?.fontSize || "default";
   root.setAttribute("data-fontsize", fontSize);
 
-  if (options.shortcuts) {
+  if (options?.shortcuts) {
     body.dataset.shortcuts = "true";
   } else {
     delete body.dataset.shortcuts;

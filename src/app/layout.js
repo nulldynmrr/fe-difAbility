@@ -10,8 +10,23 @@ import "./globals.css";
 export default function Layout({ children }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(false);
+
   useEffect(() => {
-    applyTheme(getStoredOptions());
+    const storedOptions = getStoredOptions();
+    applyTheme(storedOptions);
+
+    const handleOptionsChange = () => {
+      const latestOptions = getStoredOptions();
+      applyTheme(latestOptions);
+    };
+
+    window.addEventListener("accessibilityOptionsChanged", handleOptionsChange);
+    return () => {
+      window.removeEventListener(
+        "accessibilityOptionsChanged",
+        handleOptionsChange
+      );
+    };
   }, []);
 
   return (
