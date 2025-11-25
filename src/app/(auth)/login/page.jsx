@@ -17,7 +17,7 @@ import { useSpeechGuide } from "@/hooks/speech/useSpeechGuide";
 import { useAccessibilityOptions } from "@/hooks/useAccessibilityOptions";
 
 const formSchema = z.object({
-  email: z.string().email("Format email tidak valid"),
+  username: z.string().min(3, "Username minimal 3 karakter"),
   password: z.string().min(6, "Password minimal 6 karakter"),
 });
 
