@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import Input from "@/components/ui/Input";
+import SpeechSearchBar from "@/components/ui/Search";
 import Button from "@/components/ui/Button";
+import DisabilityImage from "@/components/ui/Image";
 import { useShortcuts } from "@/hooks/useShortcuts";
 
-const Dashboard = () => {
+export default function Home() {
   const [search, setSearch] = useState("");
 
   useShortcuts({
@@ -13,39 +14,30 @@ const Dashboard = () => {
   });
 
   return (
-    <main className="min-h-screen bg-bg text-fg p-6 flex flex-col items-center">
-      <div className="w-full max-w-2xl">
-        <h1 className="text-3xl font-bold mb-6 text-center">
-          Dashboard Pencari Pekerja
-        </h1>
+    <main className="min-h-screen bg-bg text-text-primary">
+      <header className="max-w-6xl mx-auto p-6">
+        <div className="bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg p-10 text-white">
+          <div className="text-center">
+            <span className="inline-block bg-white/10 text-white text-xs px-3 py-1 rounded-full mb-4">disability-friendly</span>
+            <h1 className="text-3xl md:text-4xl font-bold mb-2">Cari pekerjaan dengan mudah, tanpa halangan apa pun</h1>
+            <p className="text-sm md:text-base opacity-90 mb-6">Ribuan lowongan dari perusahaan yang peduli aksesibilitas</p>
 
-        <section
-          className="p-6 rounded-xl border border-primary-200 shadow-md bg-surface 
-                     transition-all focus-within:ring-2 focus-within:ring-primary-300 
-                     focus-within:ring-offset-2 focus-within:ring-offset-bg"
-        >
-          <h2 className="text-xl font-semibold mb-4 text-fg">Cari Pekerjaan</h2>
+            <div className="mx-auto max-w-2xl flex items-center gap-3">
+              <div className="flex-1">
+                <SpeechSearchBar placeholder="saya mau kerja.." />
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
 
-          <Input
-            id="search"
-            placeholder="Cari pekerjaan..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            aria-label="Cari pekerjaan"
-            shortcutLabel="ctrl+k"
-            className="w-full"
-          />
-
-          <Button
-            className="mt-4 w-full sm:w-auto bg-primary text-white hover:bg-primary-700 focus-visible:ring-2 focus-visible:ring-primary-300"
-            shortcutLabel="enter"
-          >
-            Cari
-          </Button>
-        </section>
-      </div>
+      <section className="max-w-6xl mx-auto px-6 pb-12">
+        <div className="mt-6 flex justify-center">
+          <div className="w-full md:w-4/5">
+            <DisabilityImage src="/assets/ilustrasi.svg" alt="ilustrasi aksesibilitas" width={1200} height={420} rounded={false} />
+          </div>
+        </div>
+      </section>
     </main>
   );
-};
-
-export default Dashboard;
+}
