@@ -14,7 +14,7 @@ const Dashboard = () => {
 
   return (
     <main className="min-h-screen bg-bg text-fg p-6 flex flex-col items-center">
-      <div className="w-full max-w-2xl">
+      {/* <div className="w-full max-w-2xl">
         <h1 className="text-3xl font-bold mb-6 text-center">
           Dashboard Pencari Pekerja
         </h1>
@@ -43,7 +43,7 @@ const Dashboard = () => {
             Cari
           </Button>
         </section>
-      </div>
+      </div> */}
     </main>
   );
 };
