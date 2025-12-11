@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+import Image from "@/components/ui/Image";
 import { Accessibility, Building2 } from "lucide-react";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
@@ -132,7 +132,7 @@ export default function Register() {
           />
         </div>
 
-        <div className="w-full md:w-1/2 flex flex-col justify-start px-12 pt-10 pb-10 bg-white/60 backdrop-blur-sm">
+        <div className="mt-12 w-full md:w-1/2 flex flex-col justify-start px-12 pt-10 pb-10  backdrop-blur-sm">
           <div className="flex items-center space-x-2 p-2 border border-blue-300 rounded-3xl mb-6 w-max">
             <Accessibility className="text-blue-600 w-5 h-5" />
             <p className="text-blue-600 font-semibold">disability-friendly</p>
@@ -163,7 +163,7 @@ export default function Register() {
               name="password"
               type="password"
               label="Password"
-              placeholder="kata sandi kamu"
+              placeholder="Masukkan kata sandi"
               value={formData.password}
               onChange={handleChange}
               error={getValidationError("password")}
@@ -210,6 +210,12 @@ export default function Register() {
             >
               Masuk
             </Button>
+            <p className="text-text-secondary text-center mt-2">
+              Sudah punya Akun?{" "}
+              <a className="text-primary-300 font-semibold" href="/login">
+                Masuk
+              </a>
+            </p>
           </form>
         </div>
       </div>

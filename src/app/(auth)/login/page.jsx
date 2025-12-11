@@ -99,7 +99,7 @@ export default function Login() {
         return;
       }
 
-      const res = await request.post("/admin/login", {
+      const res = await request.post("/auth/session", {
         username: formData.username,
         password: formData.password,
       });
@@ -110,7 +110,7 @@ export default function Login() {
         if (data.token) {
           Cookies.set("token", data.token, { expires: 1 });
           toast.success("Login berhasil");
-          router.push("/administrator/dashboard");
+          router.push("/");
         } else {
           toast.error("Token tidak diterima");
         }
@@ -142,7 +142,7 @@ export default function Login() {
           msg = "Akun tidak ditemukan";
           setValidations([{ name: "username", message: msg }]);
         } else if (status === 400) {
-          msg = data?.message || "Input tidak valid";
+          msg = "Input tidak valid";
         } else {
           msg = data?.message || "Server error";
         }
@@ -180,8 +180,7 @@ export default function Login() {
           />
         </div>
 
-        {/* FIX: dinaikkan dan diberi background agar form tidak ketumpuk blur */}
-        <div className="w-full md:w-1/2 flex flex-col justify-start px-12 pt-16 pb-10 bg-white/60 backdrop-blur-sm">
+        <div className="mt-24 w-full md:w-1/2 flex flex-col justify-start px-12 pt-16 pb-10 backdrop-blur-sm">
           <div className="flex items-center space-x-2 p-2 border border-blue-300 rounded-3xl mb-6 w-max">
             <Accessibility className="text-blue-600 w-5 h-5" />
             <p className="text-blue-600 font-semibold">disability-friendly</p>
@@ -200,8 +199,8 @@ export default function Login() {
             <Input
               id="username"
               name="username"
-              label="Username"
-              placeholder="username kamu"
+              label="Username or Email"
+              placeholder="Masukkan Username atau Email"
               shortcutLabel="ctrl+u"
               value={formData.username}
               onChange={handleChange}
@@ -213,7 +212,7 @@ export default function Login() {
               name="password"
               type="password"
               label="Password"
-              placeholder="kata sandi kamu"
+              placeholder="Masukkan kata sandi"
               shortcutLabel="ctrl+p"
               value={formData.password}
               onChange={handleChange}
