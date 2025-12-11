@@ -42,6 +42,7 @@ export default function Login() {
     "#username",
     options.voiceAssistant
   );
+
   useEffect(() => {
     const verify = searchParams.get("verify");
     const message = searchParams.get("message");
@@ -109,7 +110,6 @@ export default function Login() {
         if (data.token) {
           Cookies.set("token", data.token, { expires: 1 });
           toast.success("Login berhasil");
-
           router.push("/administrator/dashboard");
         } else {
           toast.error("Token tidak diterima");
@@ -162,15 +162,15 @@ export default function Login() {
         data-theme="default"
       >
         <div
-          className="absolute -top-1/3 -left-1/4 w-[900px] h-[900px] rounded-full opacity-90 blur-3xl"
+          className="absolute -top-1/3 -left-1/4 w-[900px] h-[900px] rounded-full opacity-90 blur-xl"
           style={{
             background: "linear-gradient(to right, #bfdbfe, #e0f2fe, #ffffff)",
           }}
         ></div>
-        <div className="absolute -top-1/2 -left-1/2 w-[1200px] h-[1200px] rounded-full bg-sky-100 opacity-40 blur-[150px]"></div>
+        <div className="absolute -top-1/2 -left-1/2 w-[1200px] h-[1200px] rounded-full bg-sky-100 opacity-40 blur-[120px]"></div>
       </div>
 
-      <div className="flex min-h-screen">
+      <div className="relative flex min-h-screen z-10">
         <div className="relative w-1/2 h-screen hidden md:block">
           <Image
             src="/assets/ilustrasi.svg"
@@ -180,7 +180,8 @@ export default function Login() {
           />
         </div>
 
-        <div className="w-full md:w-1/2 flex flex-col justify-center px-12">
+        {/* FIX: dinaikkan dan diberi background agar form tidak ketumpuk blur */}
+        <div className="w-full md:w-1/2 flex flex-col justify-start px-12 pt-16 pb-10 bg-white/60 backdrop-blur-sm">
           <div className="flex items-center space-x-2 p-2 border border-blue-300 rounded-3xl mb-6 w-max">
             <Accessibility className="text-blue-600 w-5 h-5" />
             <p className="text-blue-600 font-semibold">disability-friendly</p>
