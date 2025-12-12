@@ -1,7 +1,7 @@
 "use client";
 
 import Navbar from "@/components/layout/Navbar";
-import SidebarPencariKerja from "@/components/layout/Sidebar";
+import { SidebarPencariKerja } from "@/components/layout/Sidebar";
 
 export default function onSidebarJobSeeker({ children }) {
   return (

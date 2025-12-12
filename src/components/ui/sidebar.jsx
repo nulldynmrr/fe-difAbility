@@ -484,10 +484,14 @@ function SidebarMenuBadge({ className, ...props }) {
   );
 }
 function SidebarMenuSkeleton({ className, showIcon = false, ...props }) {
-  const width = React.useMemo(
-    () => `${Math.floor(Math.random() * 40) + 50}%`,
-    []
-  );
+  // Avoid non-deterministic values during SSR which cause hydration
+  // mismatches. Use a stable default on the server and set a
+  // randomized value only on the client after mount.
+  const [width, setWidth] = React.useState("60%");
+
+  React.useEffect(() => {
+    setWidth(`${Math.floor(Math.random() * 40) + 50}%`);
+  }, []);
   return (
     <div
       data-slot="sidebar-menu-skeleton"
