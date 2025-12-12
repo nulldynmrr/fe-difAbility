@@ -1,46 +1,58 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Button from "@/components/ui/Button";
 
-export default function SeeApplicants() {
-  const [currentPage, setCurrentPage] = useState(2);
+const API_URL = "http://localhost:8080/api";
 
-  const candidates = [
-    {
-      id: 1,
-      name: "Hanif Almansyah",
-      skills: ["Figma", "Figma", "Figma"],
-      certificates: 4,
-      experience: "12 Tahun Berpengalaman",
-      disability: "Tunarungu",
-    },
-    {
-      id: 2,
-      name: "Michele",
-      skills: ["Figma", "Figma", "Figma"],
-      certificates: 4,
-      experience: "12 Tahun Berpengalaman",
-      disability: "Tunarungu",
-    },
-    {
-      id: 3,
-      name: "Hanif Almansyah",
-      skills: ["Figma", "Figma", "Figma"],
-      certificates: 4,
-      experience: "12 Tahun Berpengalaman",
-      disability: "Tunarungu",
-    },
-    {
-      id: 4,
-      name: "Michele",
-      skills: ["Figma", "Figma", "Figma"],
-      certificates: 4,
-      experience: "12 Tahun Berpengalaman",
-      disability: "Tunarungu",
-    },
-  ];
+export default function SeeApplicants() {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [candidates, setCandidates] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchCandidates = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const jobId = window.location.pathname.split('/').find(segment => segment === 'jobs') || 'default';
+
+        const response = await fetch(`${API_URL}/jobs/${jobId}/applicants`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch applicants');
+        }
+
+        const data = await response.json();
+        setCandidates(data);
+      } catch (err) {
+        console.error('Error fetching applicants:', err);
+        setError(err.message);
+        // Fallback to sample data
+        setCandidates([
+          {
+            id: 1,
+            name: "Hanif Almansyah",
+            skills: ["Figma", "UI/UX", "Prototyping"],
+            certificates: 4,
+            experience: "12 Tahun Berpengalaman",
+            disability: "Tunarungu",
+          },
+          // ... other sample data
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCandidates();
+  }, []);
 
   const skillColors = [
     "bg-pink-200 text-pink-800",
@@ -157,9 +169,8 @@ export default function SeeApplicants() {
                       {candidate.skills.map((skill, skillIndex) => (
                         <span
                           key={skillIndex}
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            skillColors[skillIndex % skillColors.length]
-                          }`}
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${skillColors[skillIndex % skillColors.length]
+                            }`}
                         >
                           {skill}
                         </span>
@@ -202,11 +213,10 @@ export default function SeeApplicants() {
             <button
               key={page}
               onClick={() => setCurrentPage(page)}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                currentPage === page
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${currentPage === page
                   ? "bg-primary-300 text-white"
                   : "border border-gray-300 text-text-secondary hover:bg-gray-50"
-              }`}
+                }`}
               aria-label={`Go to page ${page}`}
             >
               {page}
