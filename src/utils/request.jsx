@@ -1,53 +1,10 @@
 import axios from "axios";
-import Cookies from "js-cookie";
-import { jwtDecode } from "jwt-decode";
 
-export function getCurrentUser() {
-  try {
-    const token = Cookies.get("token");
-    if (!token) return null;
-
-    const decoded = jwtDecode(token);
-
-    return {
-      id: decoded.id || decoded.sub,
-      username: decoded.username,
-      role: decoded.role,
-      avatar: decoded.avatar || "",
-    };
-  } catch (err) {
-    console.error("Invalid token:", err);
-    return null;
-  }
-}
 const request = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_HOST + "/api",
+  baseURL: "http://localhost:8080/api",
   timeout: 60000,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  withCredentials: true,
 });
-
-request.interceptors.request.use((config) => {
-  const token = Cookies.get("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-request.interceptors.response.use(
-  (res) => res,
-  (error) => {
-    if (error.response?.status === 401) {
-      Cookies.remove("token");
-      if (typeof window !== "undefined") {
-        window.location.href = "/login";
-      }
-    }
-    return Promise.reject(error);
-  }
-);
 
 export default {
   get: (url, params = null, headers = {}) =>
