@@ -5,6 +5,7 @@ import AccessibilityButton from "@/components/AccessibilityButton";
 import AccessibilityModal from "@/components/AccessibilityModal";
 import SpeechGuideProvider from "@/hooks/speech/speechGuideProvider";
 import { applyTheme, getStoredOptions } from "@/lib/themes";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 export default function Layout({ children }) {
@@ -39,6 +40,7 @@ export default function Layout({ children }) {
       </head>
       <body>
         {voiceEnabled && <SpeechGuideProvider />}
+        <Toaster richColors closeButton position="top-right" />
 
         {children}
 

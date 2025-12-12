@@ -1,37 +1,110 @@
 "use client";
-
-import { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-
+import Image from "@/components/ui/Image";
+import { Accessibility, Building2 } from "lucide-react";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
-import Image from "@/components/ui/Image";
-import { Accessibility } from "lucide-react";
-import { useSpeechGuide } from "@/hooks/speech/useSpeechGuide";
-import { useAccessibilityOptions } from "@/hooks/useAccessibilityOptions";
+import request from "@/utils/request";
+import { toast } from "sonner";
+import Cookies from "js-cookie";
+import { z } from "zod";
 
-export default function Registration() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+const regisSchema = z.object({
+  email: z
+    .string()
+    .min(1, "Email wajib diisi")
+    .email("Format email tidak valid"),
 
-  const options = useAccessibilityOptions();
+  password: z
+    .string()
+    .min(1, "Password wajib diisi")
+    .min(8, "Password minimal 8 karakter")
+    .regex(
+      /^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/,
+      "Password harus mengandung minimal 1 huruf kapital dan 1 karakter spesial"
+    ),
 
-  useSpeechGuide(
-    options.voiceAssistant
-      ? "Halo, kamu berada di halaman pendaftaran. Silakan masukkan nama kamu untuk buat akun."
-      : null,
-    "#name",
-    options.voiceAssistant
-  );
+  role: z.string().min(1, "Role wajib dipilih"),
+});
 
-  const onLogin = () => {
-    if (options.voiceAssistant) {
-      const u = new SpeechSynthesisUtterance("Sedang memproses registrasi...");
-      u.lang = "id-ID";
-      window.speechSynthesis.speak(u);
+export default function Register() {
+  const router = useRouter();
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    role: "",
+  });
+
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
-    alert("Login successful!");
+  };
+
+  const getValidationError = (field) => errors[field] || "";
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+
+    if (loading) return;
+    setLoading(true);
+    toast.dismiss();
+
+    const validated = regisSchema.safeParse(formData);
+
+    if (!validated.success) {
+      const newErr = {};
+      validated.error.issues.forEach((err) => {
+        newErr[err.path[0]] = err.message;
+      });
+      setErrors(newErr);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await request.post("/auth/registration", formData);
+
+      if (
+        response?.status === 201 ||
+        response?.status === 200 ||
+        response?.data?.code === 201
+      ) {
+        toast.success("Registrasi berhasil! Silakan masuk.");
+        Cookies.set("token", response.data.token);
+
+        router.push("/login");
+        return;
+      }
+
+      toast.error("Terjadi kesalahan, silakan coba lagi.");
+    } catch (err) {
+      const errorData = err.response?.data;
+      console.log("REGISTER ERROR:", errorData);
+
+      if (response?.status === 409) {
+        toast.success("Email sudah ada");
+        setLoading(false);
+        return;
+      }
+
+      const msg =
+        errorData?.message ||
+        "Terjadi kesalahan pada server. Silakan coba lagi.";
+
+      toast.error(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -41,15 +114,15 @@ export default function Registration() {
         data-theme="default"
       >
         <div
-          className="absolute -top-1/3 -left-1/4 w-[900px] h-[900px] rounded-full opacity-90 blur-3xl"
+          className="absolute -top-1/3 -left-1/4 w-[900px] h-[900px] rounded-full opacity-90 blur-xl"
           style={{
             background: "linear-gradient(to right, #bfdbfe, #e0f2fe, #ffffff)",
           }}
         ></div>
-        <div className="absolute -top-1/2 -left-1/2 w-[1200px] h-[1200px] rounded-full bg-sky-100 opacity-40 blur-[150px]"></div>
+        <div className="absolute -top-1/2 -left-1/2 w-[1200px] h-[1200px] rounded-full bg-sky-100 opacity-40 blur-[80px]"></div>
       </div>
 
-      <div className="flex min-h-screen">
+      <div className="flex min-h-screen z-100">
         <div className="relative w-1/2 h-screen hidden md:block">
           <Image
             src="/assets/ilustrasi.svg"
@@ -59,7 +132,7 @@ export default function Registration() {
           />
         </div>
 
-        <div className="w-full md:w-1/2 flex flex-col justify-center px-12">
+        <div className="mt-12 w-full md:w-1/2 flex flex-col justify-start px-12 pt-10 pb-10  backdrop-blur-sm">
           <div className="flex items-center space-x-2 p-2 border border-blue-300 rounded-3xl mb-6 w-max">
             <Accessibility className="text-blue-600 w-5 h-5" />
             <p className="text-blue-600 font-semibold">disability-friendly</p>
@@ -74,51 +147,76 @@ export default function Registration() {
             perusahaan yang peduli aksesibilitas
           </p>
 
-          <div className="space-y-2 w-full max-w-md">
-            <Input
-              id="name"
-              label="Name"
-              placeholder="nama kamu"
-              shortcutLabel="ctrl+e"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-
+          <form onSubmit={onSubmit} className="space-y-2 w-full max-w-md">
             <Input
               id="email"
+              name="email"
               label="Email"
-              placeholder="email kamu"
-              shortcutLabel="ctrl+e"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Masukkan Email"
+              value={formData.email}
+              onChange={handleChange}
+              error={getValidationError("email")}
             />
 
             <Input
               id="password"
-              label="Password"
+              name="password"
               type="password"
-              placeholder="kata sandi kamu"
-              shortcutLabel="ctrl+p"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              label="Password"
+              placeholder="Masukkan kata sandi"
+              value={formData.password}
+              onChange={handleChange}
+              error={getValidationError("password")}
             />
+
+            <label className="font-medium">Pilih Role</label>
+            <div className="grid grid-cols-2 gap-4">
+              <div
+                onClick={() =>
+                  setFormData((prev) => ({ ...prev, role: "Job Seeker" }))
+                }
+                className={`cursor-pointer border rounded-xl p-4 flex flex-col items-center transition ${
+                  formData.role === "Job Seeker"
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-300"
+                }`}
+              >
+                <Accessibility className="w-8 h-8 text-blue-600 mb-2" />
+                <p className="font-semibold">Job Seeker</p>
+              </div>
+              <div
+                onClick={() =>
+                  setFormData((prev) => ({ ...prev, role: "Company" }))
+                }
+                className={`cursor-pointer border rounded-xl p-4 flex flex-col items-center transition ${
+                  formData.role === "Company"
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-300"
+                }`}
+              >
+                <Building2 className="w-8 h-8 text-blue-600 mb-2" />
+                <p className="font-semibold">Company</p>
+              </div>
+            </div>
+
+            {errors.role && (
+              <p className="text-red-500 text-sm mt-1">{errors.role}</p>
+            )}
 
             <Button
               type="submit"
-              onClick={onLogin}
               className="mt-4 w-full py-2"
-              shortcutLabel="enter"
+              loading={loading}
             >
               Masuk
             </Button>
-
             <p className="text-text-secondary text-center mt-2">
               Sudah punya Akun?{" "}
               <a className="text-primary-300 font-semibold" href="/login">
                 Masuk
               </a>
             </p>
-          </div>
+          </form>
         </div>
       </div>
     </div>
