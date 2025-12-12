@@ -1,12 +1,38 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import SpeechSearchBar from "@/components/ui/Search";
 import DisabilityImage from "@/components/ui/Image";
 import { MapPin, DollarSign } from "lucide-react";
 import JobCard from "@/components/job/JobCard";
+import request from "@/utils/request";
+import { toast } from "sonner";
 
 export default function Dashboard() {
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const fetchAllJobs = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await request.get("/jobs");
+      setJobs(response.data || []);
+    } catch (err) {
+      if (err.response) {
+        toast.dismiss();
+        setJobs([]);
+      } else {
+        toast.error("Gagal memuat data lowongan");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAllJobs();
+  }, [fetchAllJobs]);
   return (
     <main className="p-6">
       <section className="bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg p-8 text-white mb-8">
@@ -39,34 +65,27 @@ export default function Dashboard() {
         </aside>
 
         <div className="col-span-9 space-y-6">
-          {[
-            {
-              title: "UI Designer",
-              company: "Lui Company",
-              location: "Jakarta Selatan",
-              salary: "12 juta",
-              remote: true,
-              description: "Ringkasan singkat tugas dan deskripsi pekerjaan.",
-            },
-            {
-              title: "Backend Engineer",
-              company: "Tekno Solusi",
-              location: "Bandung",
-              salary: "14 juta",
-              remote: false,
-              description: "Bertanggung jawab pada layanan dan API.",
-            },
-            {
-              title: "Product Designer",
-              company: "Desain Kita",
-              location: "Surabaya",
-              salary: "10 juta",
-              remote: true,
-              description: "Mendesain produk yang inklusif dan mudah diakses.",
-            },
-          ].map((job, i) => (
-            <JobCard key={i} {...job} />
-          ))}
+          {loading ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500">Memuat lowongan...</p>
+            </div>
+          ) : jobs.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500">Belum ada lowongan tersedia</p>
+            </div>
+          ) : (
+            jobs.map((job) => (
+              <JobCard
+                key={job.id}
+                title={job.title}
+                company={job.company?.name || "Company"}
+                location={job.company?.address || "Location"}
+                salary={job.salary ? `Rp ${job.salary.toLocaleString('id-ID')}` : "Negotiable"}
+                remote={job.jobType === "Remote" || false}
+                description={job.description || job.jobDescription || ""}
+              />
+            ))
+          )}
         </div>
       </section>
     </main>
