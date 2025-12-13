@@ -1,6 +1,4 @@
 import axios from "axios";
-import Cookies from "js-cookie";
-import { jwtDecode } from "jwt-decode";
 
 export function getCurrentUser() {
   try {
@@ -19,11 +17,9 @@ export function getCurrentUser() {
   }
 }
 const request = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_HOST + "/api",
+  baseURL: "http://localhost:8080/api",
   timeout: 60000,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  withCredentials: true,
 });
 
 request.interceptors.request.use((config) => {
