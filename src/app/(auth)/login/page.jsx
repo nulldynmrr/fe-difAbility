@@ -10,7 +10,7 @@ import { Accessibility } from "lucide-react";
 
 import Cookies from "js-cookie";
 import { toast } from "sonner";
-import request from "@/utils/request";
+import request, { getCurrentUser } from "@/utils/request";
 import { z } from "zod";
 
 import { useSpeechGuide } from "@/hooks/speech/useSpeechGuide";
@@ -109,8 +109,28 @@ export default function Login() {
 
         if (data.token) {
           Cookies.set("token", data.token, { expires: 1 });
+
+          const user = getCurrentUser();
+
+          if (!user) {
+            toast.error("Token tidak valid");
+            setLoading(false);
+            return;
+          }
+
+          if (user.role === "Company" || user.role === "COMPANY") {
+            router.push("/employer/dashboard");
+          } else if (user.role === "Job Seeker") {
+            router.push("/job-seeker/dashboard");
+          } else if (user.role === "Human Resource") {
+            router.push("/employer/dashboard");
+          } else if (user.role === "Admin") {
+            router.push("/admin");
+          } else {
+            router.push("/");
+          }
+
           toast.success("Login berhasil");
-          router.push("/");
         } else {
           toast.error("Token tidak diterima");
         }

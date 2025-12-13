@@ -31,7 +31,7 @@ export default function Button({
     <button
       onClick={onClick}
       onFocus={handleFocus}
-      className={`${baseClass} ${className} relative flex items-center justify-center gap-2 focus:ring-2 focus:ring-primary-100`}
+      className={`${baseClass} ${className} cursor-pointer relative flex items-center justify-center gap-2 focus:ring-2 focus:ring-primary-100`}
       aria-label={voiceLabel || children}
     >
       {children}
