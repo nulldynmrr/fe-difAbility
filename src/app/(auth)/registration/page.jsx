@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import Cookies from "js-cookie";
 import { z } from "zod";
 
+import { useAccessibilityOptions } from "@/hooks/useAccessibilityOptions";
+
 const regisSchema = z.object({
   email: z
     .string()
@@ -30,6 +32,7 @@ const regisSchema = z.object({
 
 export default function Register() {
   const router = useRouter();
+  const options = useAccessibilityOptions();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -58,6 +61,14 @@ export default function Register() {
     if (loading) return;
     setLoading(true);
     toast.dismiss();
+
+    if (options.voiceAssistant) {
+      const u = new SpeechSynthesisUtterance(
+        "Sedang memproses pendaftaran. Mohon tunggu."
+      );
+      u.lang = "id-ID";
+      window.speechSynthesis.speak(u);
+    }
 
     const validated = regisSchema.safeParse(formData);
 
@@ -89,10 +100,12 @@ export default function Register() {
       toast.error("Terjadi kesalahan, silakan coba lagi.");
     } catch (err) {
       const errorData = err.response?.data;
+      const status = err.response?.status;
+
       console.log("REGISTER ERROR:", errorData);
 
-      if (response?.status === 409) {
-        toast.success("Email sudah ada");
+      if (status === 409) {
+        toast.error("Email sudah terdaftar");
         setLoading(false);
         return;
       }

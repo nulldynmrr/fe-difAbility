@@ -379,7 +379,7 @@
   --text-primary: 0 0 0;
   --text-secondary: 56 56 56;
 
-  --border: 220 220 220;
+  --border: #dcdcdc;
   --muted: var(--primary-50);
   --muted-foreground: var(--text-secondary);
 
@@ -494,7 +494,7 @@ html[data-theme="color-blind"] {
   --card: 248 249 250;
   --text-primary: 0 43 85;
   --text-secondary: 0 43 85;
-  --border: 51 133 204;
+  --border: #dcdcdc;
   --background: rgb(248, 249, 250);
   --foreground: rgb(0, 43, 85);
   --primary: rgb(51, 133, 204);

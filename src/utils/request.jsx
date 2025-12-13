@@ -8,12 +8,10 @@ export function getCurrentUser() {
     if (!token) return null;
 
     const decoded = jwtDecode(token);
-
     return {
-      id: decoded.id || decoded.sub,
-      username: decoded.username,
+      id: decoded.id,
+      email: decoded.email,
       role: decoded.role,
-      avatar: decoded.avatar || "",
     };
   } catch (err) {
     console.error("Invalid token:", err);
@@ -40,11 +38,15 @@ request.interceptors.response.use(
   (res) => res,
   (error) => {
     if (error.response?.status === 401) {
-      Cookies.remove("token");
-      if (typeof window !== "undefined") {
-        window.location.href = "/login";
+      const isLoginRequest = error.config.url.includes("/auth/session");
+      if (!isLoginRequest) {
+        Cookies.remove("token");
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
       }
     }
+
     return Promise.reject(error);
   }
 );
