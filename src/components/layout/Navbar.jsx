@@ -153,7 +153,7 @@ export default function Navbar() {
                 </a>
 
                 <a
-                  href="/register-company"
+                  href="/employer/registration-company"
                   className="flex items-center space-x-2 px-3 py-2 bg-primary-300 text-white rounded-lg"
                 >
                   <Building className="w-4 h-4" />
