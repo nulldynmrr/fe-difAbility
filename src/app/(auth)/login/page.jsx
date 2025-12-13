@@ -8,7 +8,6 @@ import Button from "@/components/ui/Button";
 import Image from "@/components/ui/Image";
 import { Accessibility } from "lucide-react";
 
-import Cookies from "js-cookie";
 import { toast } from "sonner";
 import request, { getCurrentUser } from "@/utils/request";
 import { z } from "zod";
@@ -63,14 +62,11 @@ export default function Login() {
     }
   }, [searchParams, router]);
 
-  const handleChange = (e) => {
+  const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
 
-  const getValidationError = (field) => {
-    const err = validations.find((v) => v.name === field);
-    return err?.message;
-  };
+  const getValidationError = (field) =>
+    validations.find((v) => v.name === field)?.message;
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -87,6 +83,7 @@ export default function Login() {
 
     try {
       const validation = formSchema.safeParse(formData);
+
       if (!validation.success) {
         setValidations(
           validation.error.issues.map((err) => ({
@@ -99,13 +96,18 @@ export default function Login() {
         return;
       }
 
-      const res = await request.post("/auth/session", {
-        username: formData.username,
-        password: formData.password,
-      });
+      // LOGIN
+      const res = await request.post(
+        "/auth/session",
+        {
+          username: formData.username,
+          password: formData.password,
+        },
+        { withCredentials: true }
+      );
 
       if (res.status === 200 || res.status === 201) {
-        const data = res.data;
+        toast.success("Login berhasil");
 
         if (data.token) {
           Cookies.set("token", data.token, { expires: 1 });
@@ -134,10 +136,22 @@ export default function Login() {
         } else {
           toast.error("Token tidak diterima");
         }
-      } else {
-        toast.error("Login gagal");
+
+        if (role === "Company") {
+          if (!completed) router.push("/company/onboarding");
+          else router.push("/company/dashboard");
+        } else if (role === "Job Seeker") {
+          if (!completed) router.push("/job-seeker/onboarding");
+          else router.push("/job-seeker/dashboard");
+        } else if (role === "Human Resource") {
+          router.push("/hr/dashboard");
+        }
+
+        setLoading(false);
+        return;
       }
 
+      toast.error("Login gagal");
       setLoading(false);
     } catch (error) {
       let msg = "";
@@ -177,30 +191,27 @@ export default function Login() {
 
   return (
     <div className="min-h-screen relative bg-bg">
-      <div
-        className="absolute inset-0 z-0 overflow-hidden pointer-events-none"
-        data-theme="default"
-      >
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <div
           className="absolute -top-1/3 -left-1/4 w-[900px] h-[900px] rounded-full opacity-90 blur-xl"
           style={{
             background: "linear-gradient(to right, #bfdbfe, #e0f2fe, #ffffff)",
           }}
-        ></div>
-        <div className="absolute -top-1/2 -left-1/2 w-[1200px] h-[1200px] rounded-full bg-sky-100 opacity-40 blur-[120px]"></div>
+        />
+        <div className="absolute -top-1/2 -left-1/2 w-[1200px] h-[1200px] rounded-full bg-sky-100 opacity-40 blur-[120px]" />
       </div>
 
       <div className="relative flex min-h-screen z-10">
         <div className="relative w-1/2 h-screen hidden md:block">
           <Image
             src="/assets/ilustrasi.svg"
-            alt="Ilustrasi siswa sedang belajar dengan komputer"
+            alt="Ilustrasi siswa sedang belajar"
             fill
             className="object-cover"
           />
         </div>
 
-        <div className="mt-24 w-full md:w-1/2 flex flex-col justify-start px-12 pt-16 pb-10 backdrop-blur-sm">
+        <div className="mt-24 w-full md:w-1/2 px-12 pt-16 pb-10 backdrop-blur-sm">
           <div className="flex items-center space-x-2 p-2 border border-blue-300 rounded-3xl mb-6 w-max">
             <Accessibility className="text-blue-600 w-5 h-5" />
             <p className="text-blue-600 font-semibold">disability-friendly</p>
@@ -250,10 +261,7 @@ export default function Login() {
 
             <p className="text-text-secondary text-center mt-2">
               Belum punya Akun?{" "}
-              <a
-                className="text-primary-300 font-semibold"
-                href="/registration"
-              >
+              <a className="text-primary-300 font-semibold" href="/register">
                 Daftar
               </a>
             </p>

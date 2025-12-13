@@ -79,20 +79,19 @@ export const sidebarData = {
         items: [
           {
             title: "Dashboard",
-            url: "/pemberi/dashboard",
+            url: "/company/dashboard",
             icon: LayoutDashboard,
           },
           {
-            title: "Posting Lowongan Baru",
-            url: "/pemberi/posting",
+            title: "Daftar Lowongan",
+            url: "/company/job-posting",
             icon: Briefcase,
           },
           {
-            title: "Daftar Kandidat Saya",
-            url: "/pemberi/kandidat",
+            title: "Daftar Pelamar",
+            url: "/company/see-applicants",
             icon: Users,
           },
-          { title: "Notifikasi", url: "/pemberi/notifikasi", icon: Bell },
         ],
       },
     ],
