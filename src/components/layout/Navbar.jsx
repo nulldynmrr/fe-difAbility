@@ -101,17 +101,26 @@ export default function Navbar() {
                 </button>
 
                 {dropdown && (
-                  <div className="absolute right-0 mt-2 bg-white shadow-lg rounded-lg border border-border w-40 py-2">
+                  <div
+                    className="absolute right-0 mt-2 rounded-lg border w-40 py-2 shadow-lg"
+                    style={{
+                      backgroundColor: "rgb(var(--bg-card))",
+                      borderColor: "rgb(var(--border))",
+                      color: "rgb(var(--text-primary))",
+                    }}
+                  >
                     <a
                       href="/profile"
-                      className="px-4 py-2 block hover:bg-primary-50 text-text-primary"
+                      className="px-4 py-2 block rounded hover:bg-[rgb(var(--primary-50))] transition-colors"
+                      style={{ color: "rgb(var(--text-primary))" }}
                     >
                       Profile
                     </a>
 
                     <button
                       onClick={handleLogout}
-                      className="px-4 py-2 w-full text-left hover:bg-primary-50 flex items-center space-x-2 text-red-500"
+                      className="px-4 py-2 w-full text-left flex items-center space-x-2 rounded hover:bg-[rgb(var(--primary-50))] transition-colors"
+                      style={{ color: "rgb(var(--destructive))" }}
                     >
                       <LogOut className="w-4 h-4" />
                       <span>Logout</span>

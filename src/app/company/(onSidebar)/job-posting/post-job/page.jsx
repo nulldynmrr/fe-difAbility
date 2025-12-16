@@ -1,350 +1,218 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import request from "@/utils/request";
+import Input from "@/components/ui/Input";
+import Textarea from "@/components/ui/Textarea";
+import InputDropdown from "@/components/ui/dropdown";
+import CheckboxDropdown from "@/components/ui/checkbox";
+import Button from "@/components/ui/Button";
+import HeaderCard from "@/components/card/HeaderCard";
+import { z } from "zod";
 
+/* ================= VALIDATION ================= */
+const postJobSchema = z.object({
+  title: z.string().min(3, "Minimal 3 karakter"),
+  description: z.string().min(10, "Minimal 10 karakter"),
+  salary: z.string().min(1, "Gaji wajib diisi"),
+  minimumEducation: z.string().min(1, "Pilih pendidikan"),
+  minimumYearsExperience: z.string().min(1, "Wajib diisi"),
+  compatibleDisabilities: z.array(z.string()).min(1, "Pilih minimal 1"),
+  registrationDeadline: z.string().min(1, "Deadline wajib"),
+  publicationStatus: z.string().min(1, "Status publikasi wajib"),
+});
+
+/* ================= COMPONENT ================= */
 export default function PostJob() {
   const router = useRouter();
 
-  // ENUM
-  const [educationLevels, setEducationLevels] = useState([]);
-  const [jobTypes, setJobTypes] = useState([]);
-  const [disabilityTypes, setDisabilityTypes] = useState([]);
-
-  useEffect(() => {
-    const loadEnums = async () => {
-      try {
-        const edu = await request.get("/enums/education-levels");
-        const jt = await request.get("/enums/job-types");
-        const dis = await request.get("/enums/disability-types");
-
-        setEducationLevels(edu.data || []);
-        setJobTypes(jt.data || []);
-        setDisabilityTypes(dis.data || []);
-      } catch {
-        toast.error("Gagal memuat enum");
-      }
-    };
-
-    loadEnums();
-  }, []);
-
+  /* ===== FORM STATE ===== */
   const [form, setForm] = useState({
     title: "",
-    jobDescription: "",
+    description: "",
     salary: "",
     minimumEducation: "",
     minimumYearsExperience: "",
-    jobType: "",
     compatibleDisabilities: [],
-    registrationDeadline: "", // YYYY-MM-DD
+    registrationDeadline: "",
+    publicationStatus: "",
   });
 
   const [errors, setErrors] = useState({});
-  const disabilityRef = useRef(null);
-  const [openDisability, setOpenDisability] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  // Tutup dropdown disabilitas
+  /* ===== ENUM OPTIONS ===== */
+  const [educationOptions, setEducationOptions] = useState([]);
+  const [disabilityOptions, setDisabilityOptions] = useState([]);
+  const [publicationOptions, setPublicationOptions] = useState([]);
+
+  /* ================= FETCH ENUM ================= */
   useEffect(() => {
-    const handler = (e) => {
-      if (disabilityRef.current && !disabilityRef.current.contains(e.target)) {
-        setOpenDisability(false);
-      }
-    };
-    document.addEventListener("click", handler);
-    return () => document.removeEventListener("click", handler);
-  }, []);
-
-  // Format Rupiah
-  const formatRupiah = (num) => {
-    if (!num) return "";
-    return "Rp" + Number(num).toLocaleString("id-ID");
-  };
-
-  const handleSalaryInput = (e) => {
-    let v = e.target.value.replace(/\D/g, "");
-    if (v.length > 12) v = v.slice(0, 12);
-    setForm({ ...form, salary: v });
-  };
-
-  const toggleDisability = (d) => {
-    const exists = form.compatibleDisabilities.includes(d);
-    setForm({
-      ...form,
-      compatibleDisabilities: exists
-        ? form.compatibleDisabilities.filter((x) => x !== d)
-        : [...form.compatibleDisabilities, d],
-    });
-  };
-
-  // VALIDATION
-  const validate = () => {
-    const err = {};
-
-    if (!form.title || form.title.length < 3 || form.title.length > 50)
-      err.title = "Nama posisi harus 3-50 karakter.";
-
-    if (!form.jobDescription || form.jobDescription.length < 10)
-      err.jobDescription = "Deskripsi minimal 10 karakter.";
-
-    if (form.jobDescription.length > 500)
-      err.jobDescription = "Deskripsi maksimal 500 karakter.";
-
-    if (!form.salary) err.salary = "Gaji wajib diisi.";
-
-    if (!form.minimumEducation)
-      err.minimumEducation = "Pendidikan wajib dipilih.";
-
-    if (!form.minimumYearsExperience)
-      err.minimumYearsExperience = "Pengalaman wajib diisi.";
-
-    if (String(form.minimumYearsExperience).length > 2)
-      err.minimumYearsExperience = "Maksimal 2 digit.";
-
-    if (!form.jobType) err.jobType = "Pilih satu job type.";
-
-    if (form.compatibleDisabilities.length === 0)
-      err.compatibleDisabilities = "Pilih minimal satu disabilitas.";
-
-    if (!form.registrationDeadline)
-      err.registrationDeadline = "Deadline wajib diisi.";
-    else {
-      const inputDate = new Date(form.registrationDeadline + "T23:59:00");
-      const now = new Date();
-      if (inputDate <= now)
-        err.registrationDeadline = "Deadline harus lebih besar dari sekarang.";
-    }
-
-    setErrors(err);
-    return Object.keys(err).length === 0;
-  };
-
-  // ==============================
-  //   SET DEADLINE → ALWAYS 23:59
-  // ==============================
-  const convertDateTo2359 = (dateOnly) => {
-    const d = new Date(dateOnly + "T23:59:00");
-    return d.toISOString();
-  };
-
-  const handleSubmit = async () => {
-    if (!validate()) return;
-
-    const finalDeadline = convertDateTo2359(form.registrationDeadline);
-
-    try {
-      await request.post(
-        "/jobs",
-        {
-          title: form.title,
-          jobDescription: form.jobDescription,
-          salary: Number(form.salary),
-          minimumEducation: form.minimumEducation,
-          minimumYearsExperience: Number(form.minimumYearsExperience),
-          jobType: form.jobType,
-          compatibleDisabilities: form.compatibleDisabilities,
-          registrationDeadline: finalDeadline,
-        },
-        { withCredentials: true }
+    request
+      .get("/enums/education-levels")
+      .then((res) =>
+        setEducationOptions(res.data.map((v) => ({ label: v, value: v })))
       );
 
+    request
+      .get("/enums/disability-types")
+      .then((res) =>
+        setDisabilityOptions(res.data.map((v) => ({ label: v, value: v })))
+      );
+
+    request
+      .get("/enums/publication-statuses")
+      .then((res) =>
+        setPublicationOptions(res.data.map((v) => ({ label: v, value: v })))
+      );
+  }, []);
+
+  /* ================= HANDLER ================= */
+  const handleChange = (field, value) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+  };
+
+  const formatRupiah = (v) =>
+    v ? "Rp" + Number(v).toLocaleString("id-ID") : "";
+
+  const handleSalaryInput = (e) => {
+    const raw = e.target.value.replace(/\D/g, "").slice(0, 12);
+    handleChange("salary", raw);
+  };
+
+  /* ================= SUBMIT ================= */
+  const onSubmit = async () => {
+    if (loading) return;
+    setLoading(true);
+    setErrors({});
+    toast.dismiss();
+
+    const validation = postJobSchema.safeParse(form);
+    if (!validation.success) {
+      const errMap = {};
+      validation.error.issues.forEach((i) => {
+        errMap[i.path[0]] = i.message;
+      });
+      setErrors(errMap);
+      toast.error("Lengkapi semua field");
+      setLoading(false);
+      return;
+    }
+
+    const payload = {
+      title: form.title,
+      description: form.description,
+      salary: Number(form.salary),
+      minimumEducation: form.minimumEducation,
+      minimumYearsExperience: Number(form.minimumYearsExperience),
+      compatibleDisabilities: form.compatibleDisabilities,
+      registrationDeadline: `${form.registrationDeadline}T23:59:59`,
+      publicationStatus: form.publicationStatus, // ✅ DARI API ENUM
+    };
+
+    console.log("POST /api/jobs payload:", payload);
+
+    try {
+      await request.post("/jobs", payload);
       toast.success("Lowongan berhasil diposting");
       router.push("/company/job-posting");
     } catch (err) {
       toast.error(err.response?.data?.message || "Gagal memposting lowongan");
+    } finally {
+      setLoading(false);
     }
   };
 
+  /* ================= UI ================= */
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="w-full rounded h-48 bg-blue-700 text-white p-6 flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Buat Postingan Pekerjaan Baru</h1>
-          <p className="text-gray-200 text-lg mt-1">
-            Pastikan informasi pekerjaan lengkap
-          </p>
-        </div>
-      </div>
+    <div className="min-h-screen p-6 mt-10">
+      <HeaderCard
+        title="Posting Lowongan Kerja"
+        subtitle="Mendukung kesempatan kerja untuk disabilitas"
+      />
 
-      <div className="mt-8 bg-white p-6 rounded shadow-sm border border-gray-200">
-        <h2 className="font-semibold text-lg mb-6">Daftar Lowongan Kerja</h2>
+      <div className="mt-8 bg-card p-6 rounded border">
+        <Input
+          label="Nama Posisi Kerja"
+          value={form.title}
+          onChange={(e) => handleChange("title", e.target.value)}
+          error={errors.title}
+          required
+        />
 
-        <div className="mb-4">
-          <label className="text-sm font-semibold">Nama Posisi Kerja</label>
-          <input
-            maxLength={50}
-            className="mt-1 w-full p-2 bg-gray-100 rounded text-sm"
-            value={form.title}
-            onChange={(e) => setForm({ ...form, title: e.target.value })}
+        <Input
+          label="Target Gaji"
+          value={formatRupiah(form.salary)}
+          onChange={handleSalaryInput}
+          error={errors.salary}
+          required
+          className="mt-4"
+        />
+
+        <Textarea
+          label="Deskripsi Pekerjaan"
+          value={form.description}
+          onChange={(e) => handleChange("description", e.target.value)}
+          error={errors.description}
+          rows={4}
+          className="mt-4"
+          required
+        />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <InputDropdown
+            label="Minimum Pendidikan"
+            options={educationOptions}
+            value={form.minimumEducation}
+            onChange={(v) => handleChange("minimumEducation", v)}
+            error={errors.minimumEducation}
           />
-          {errors.title && (
-            <p className="text-red-600 text-xs">{errors.title}</p>
-          )}
-        </div>
 
-        <div className="mb-8">
-          <label className="text-sm font-semibold">Deskripsi Pekerjaan</label>
-          <textarea
-            rows="5"
-            maxLength={500}
-            className="mt-1 w-full p-2 bg-gray-100 rounded text-sm"
-            value={form.jobDescription}
+          <Input
+            type="number"
+            label="Pengalaman (Tahun)"
+            value={form.minimumYearsExperience}
             onChange={(e) =>
-              setForm({ ...form, jobDescription: e.target.value })
+              handleChange("minimumYearsExperience", e.target.value.slice(0, 2))
             }
+            error={errors.minimumYearsExperience}
           />
-          <p className="text-xs text-gray-500">
-            {form.jobDescription.length}/500 karakter
-          </p>
-          {errors.jobDescription && (
-            <p className="text-red-600 text-xs">{errors.jobDescription}</p>
-          )}
+
+          <CheckboxDropdown
+            label="Disabilitas"
+            options={disabilityOptions}
+            value={form.compatibleDisabilities}
+            onChange={(v) => handleChange("compatibleDisabilities", v)}
+            error={errors.compatibleDisabilities}
+          />
+
+          <Input
+            type="date"
+            label="Batas Pendaftaran"
+            value={form.registrationDeadline}
+            onChange={(e) =>
+              handleChange("registrationDeadline", e.target.value)
+            }
+            error={errors.registrationDeadline}
+          />
+
+          <InputDropdown
+            label="Status Publikasi"
+            options={publicationOptions}
+            value={form.publicationStatus}
+            onChange={(v) => handleChange("publicationStatus", v)}
+            error={errors.publicationStatus}
+          />
         </div>
 
-        <h2 className="font-semibold text-lg mb-4">Overview Job</h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <label className="text-sm font-semibold">Minimum Pendidikan</label>
-            <select
-              className="mt-1 w-full p-2 bg-gray-100 rounded text-sm"
-              value={form.minimumEducation}
-              onChange={(e) =>
-                setForm({ ...form, minimumEducation: e.target.value })
-              }
-            >
-              <option value="">Pilih Pendidikan</option>
-              {educationLevels.map((ed) => (
-                <option key={ed}>{ed}</option>
-              ))}
-            </select>
-            {errors.minimumEducation && (
-              <p className="text-red-600 text-xs">{errors.minimumEducation}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="text-sm font-semibold">Target Gaji</label>
-            <input
-              type="text"
-              className="mt-1 w-full p-2 bg-gray-100 rounded text-sm"
-              value={formatRupiah(form.salary)}
-              onChange={handleSalaryInput}
-            />
-            {errors.salary && (
-              <p className="text-red-600 text-xs">{errors.salary}</p>
-            )}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <label className="text-sm font-semibold">
-              Minimum Tahun Pengalaman
-            </label>
-            <input
-              type="number"
-              max={99}
-              className="mt-1 w-full p-2 bg-gray-100 rounded text-sm"
-              value={form.minimumYearsExperience}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  minimumYearsExperience: e.target.value.slice(0, 2),
-                })
-              }
-            />
-            {errors.minimumYearsExperience && (
-              <p className="text-red-600 text-xs">
-                {errors.minimumYearsExperience}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label className="text-sm font-semibold">Job Type</label>
-            <select
-              className="mt-1 w-full p-2 bg-gray-100 rounded text-sm"
-              value={form.jobType}
-              onChange={(e) => setForm({ ...form, jobType: e.target.value })}
-            >
-              <option value="">Pilih Job Type</option>
-              {jobTypes.map((jt) => (
-                <option key={jt}>{jt}</option>
-              ))}
-            </select>
-            {errors.jobType && (
-              <p className="text-red-600 text-xs">{errors.jobType}</p>
-            )}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="relative" ref={disabilityRef}>
-            <label className="text-sm font-semibold">Disabilitas</label>
-
-            <div
-              className="mt-1 w-full p-2 bg-gray-100 rounded text-sm cursor-pointer"
-              onClick={() => setOpenDisability(!openDisability)}
-            >
-              {form.compatibleDisabilities.length > 0
-                ? form.compatibleDisabilities.join(", ")
-                : "Pilih Disabilitas"}
-            </div>
-
-            {openDisability && (
-              <div className="bg-white border border-gray-200 rounded shadow-sm mt-1 p-2 absolute z-20 w-full">
-                {disabilityTypes.map((d) => (
-                  <label key={d} className="flex items-center gap-2 p-1">
-                    <input
-                      type="checkbox"
-                      checked={form.compatibleDisabilities.includes(d)}
-                      onChange={() => toggleDisability(d)}
-                    />
-                    <span>{d}</span>
-                  </label>
-                ))}
-              </div>
-            )}
-
-            {errors.compatibleDisabilities && (
-              <p className="text-red-600 text-xs">
-                {errors.compatibleDisabilities}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label className="text-sm font-semibold">Batas Pendaftaran</label>
-            <input
-              type="date"
-              className="mt-1 w-full p-2 bg-gray-100 rounded text-sm"
-              value={form.registrationDeadline}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  registrationDeadline: e.target.value,
-                })
-              }
-            />
-            {errors.registrationDeadline && (
-              <p className="text-red-600 text-xs">
-                {errors.registrationDeadline}
-              </p>
-            )}
-          </div>
-        </div>
-
-        <div className="flex justify-end mt-8">
-          <button
-            className="px-6 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-800 transition"
-            onClick={handleSubmit}
-          >
-            Posting Kerja
-          </button>
-        </div>
+        <Button className="mt-6 w-full" onClick={onSubmit} disabled={loading}>
+          {loading ? "Memposting..." : "Posting Lowongan"}
+        </Button>
       </div>
     </div>
   );

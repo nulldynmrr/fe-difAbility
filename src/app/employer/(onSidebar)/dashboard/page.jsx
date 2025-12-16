@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import SpeechSearchBar from "@/components/ui/Search";
 import DisabilityImage from "@/components/ui/Image";
 import { MapPin, DollarSign } from "lucide-react";
-import JobCard from "@/components/job/JobCard";
+import JobCard from "@/components/card/JobCard";
 import request from "@/utils/request";
 import { toast } from "sonner";
 
@@ -38,8 +38,12 @@ export default function Dashboard() {
       <section className="bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg p-8 text-white mb-8">
         <div className="max-w-6xl mx-auto flex items-center gap-8">
           <div className="flex-1">
-            <h1 className="text-3xl font-bold mb-2">Cari pekerjaan dengan mudah, tanpa halangan apa pun</h1>
-            <p className="text-sm opacity-90">Ribuan lowongan dari perusahaan yang peduli aksesibilitas</p>
+            <h1 className="text-3xl font-bold mb-2">
+              Cari pekerjaan dengan mudah, tanpa halangan apa pun
+            </h1>
+            <p className="text-sm opacity-90">
+              Ribuan lowongan dari perusahaan yang peduli aksesibilitas
+            </p>
 
             <div className="mt-6">
               <SpeechSearchBar placeholder="saya mau kerja.." />
@@ -47,7 +51,13 @@ export default function Dashboard() {
           </div>
 
           <div className="w-56 hidden md:block">
-            <DisabilityImage src="/assets/ilustrasi.svg" alt="illustration" width={220} height={140} rounded={false} />
+            <DisabilityImage
+              src="/assets/ilustrasi.svg"
+              alt="illustration"
+              width={220}
+              height={140}
+              rounded={false}
+            />
           </div>
         </div>
       </section>
@@ -57,8 +67,12 @@ export default function Dashboard() {
           <h4 className="font-semibold mb-4">Filter</h4>
 
           <ul className="space-y-3 text-sm text-primary-400">
-            <li className="flex items-center gap-3"><MapPin className="w-4 h-4" /> Jakarta Selatan</li>
-            <li className="flex items-center gap-3"><DollarSign className="w-4 h-4" /> 12 juta</li>
+            <li className="flex items-center gap-3">
+              <MapPin className="w-4 h-4" /> Jakarta Selatan
+            </li>
+            <li className="flex items-center gap-3">
+              <DollarSign className="w-4 h-4" /> 12 juta
+            </li>
             <li className="flex items-center gap-3">Remmote</li>
             <li className="flex items-center gap-3">Remmote</li>
           </ul>
@@ -80,7 +94,11 @@ export default function Dashboard() {
                 title={job.title}
                 company={job.company?.name || "Company"}
                 location={job.company?.address || "Location"}
-                salary={job.salary ? `Rp ${job.salary.toLocaleString('id-ID')}` : "Negotiable"}
+                salary={
+                  job.salary
+                    ? `Rp ${job.salary.toLocaleString("id-ID")}`
+                    : "Negotiable"
+                }
                 remote={job.jobType === "Remote" || false}
                 description={job.description || job.jobDescription || ""}
               />

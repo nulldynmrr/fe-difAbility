@@ -9,6 +9,7 @@ import {
   MessageSquare,
   Briefcase,
   Users,
+  Building2,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -91,6 +92,11 @@ export const sidebarData = {
             title: "Daftar Pelamar",
             url: "/company/see-applicants",
             icon: Users,
+          },
+          {
+            title: "Profile Perusahaan",
+            url: "/company/profile",
+            icon: Building2,
           },
         ],
       },

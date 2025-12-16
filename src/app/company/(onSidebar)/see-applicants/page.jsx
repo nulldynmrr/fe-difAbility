@@ -3,6 +3,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
+import HeaderCard from "@/components/card/HeaderCard";
 
 export default function SeeApplicants() {
   const router = useRouter();
@@ -51,14 +52,11 @@ export default function SeeApplicants() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6 mt-10">
-      <div className="w-full rounded-sm h-40 bg-blue-700 text-white p-6 flex items-center">
-        <div className="z-10">
-          <h2 className="text-3xl font-bold">Daftar Pelamar</h2>
-          <p className="text-gray-200 text-lg mt-1">
-            Meningkatkan kepercayaan kepada disabilitas
-          </p>
-        </div>
-      </div>
+      <HeaderCard
+        title="Daftar Pelamar Kerja"
+        subtitle="Lowongan yang sesuai dengan kebutuhan dan keahlianmu"
+        placeholder="cari pekerjaan, contoh: UI Designer"
+      />
 
       {jobs.map((job) => (
         <div
