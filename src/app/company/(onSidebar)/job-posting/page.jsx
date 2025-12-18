@@ -4,12 +4,16 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import request from "@/utils/request";
 import { toast } from "sonner";
-import { Calendar, Briefcase, Coins } from "lucide-react";
+import { Calendar, Briefcase, Coins, X, Copy } from "lucide-react";
 
 export default function JobPosting() {
   const router = useRouter();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [generatingHR, setGeneratingHR] = useState(false);
+  const [hrData, setHrData] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [confirmSaved, setConfirmSaved] = useState(false);
 
   useEffect(() => {
     async function fetchJobs() {
@@ -26,6 +30,29 @@ export default function JobPosting() {
   }, []);
 
   const openJobs = jobs.filter((j) => j.publicationStatus === "Open");
+
+  const handleGenerateHR = async () => {
+    setGeneratingHR(true);
+    try {
+      const res = await request.post("/companies/me/humanresources", {});
+      console.log(res.data);
+
+      setHrData(res.data);
+      setShowModal(true);
+      setConfirmSaved(false); // reset checkbox modal
+      toast.success("HR account berhasil dibuat!");
+    } catch (err) {
+      console.error("Error generating HR:", err.response?.data || err.message);
+      toast.error(err.response?.data?.message || "Gagal membuat HR account");
+    } finally {
+      setGeneratingHR(false);
+    }
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    toast.success("Disalin ke clipboard!");
+  };
 
   if (loading) {
     return (
@@ -51,13 +78,26 @@ export default function JobPosting() {
           Posting Lamaran Kerja
         </h2>
 
-        <button
-          onClick={() => router.push("/company/job-posting/post-job")}
-          className="px-6 py-3 bg-blue-600 text-white rounded-xs text-sm
-          hover:bg-blue-700 transition"
-        >
-          Buat Postingan Baru
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={() => router.push("/company/job-posting/post-job")}
+            className="px-6 py-3 bg-blue-600 text-white rounded-xs text-sm
+            hover:bg-blue-700 transition"
+          >
+            Buat Postingan Baru
+          </button>
+
+          <button
+            onClick={handleGenerateHR}
+            disabled={generatingHR}
+            className={`px-6 py-3 bg-green-600 text-white rounded-xs text-sm 
+              hover:bg-green-700 transition ${
+                generatingHR ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+          >
+            {generatingHR ? "Membuat HR..." : "Generate HR Akun"}
+          </button>
+        </div>
       </div>
 
       <div className="mt-4 space-y-6">
@@ -65,6 +105,70 @@ export default function JobPosting() {
           <JobCard key={job.id} job={job} router={router} />
         ))}
       </div>
+
+      {/* Modal HR Account */}
+      {showModal && hrData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white p-6 rounded-lg w-96 relative">
+            <button
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+              onClick={() => {
+                if (confirmSaved) setShowModal(false);
+                else
+                  alert("Silakan simpan username & password sebelum menutup!");
+              }}
+            >
+              <X size={20} />
+            </button>
+
+            <h3 className="text-xl font-semibold mb-4">HR Account Created</h3>
+
+            <div className="flex items-center justify-between mb-2">
+              <p>
+                <strong>Username:</strong> {hrData.generatedUsername}
+              </p>
+              <button onClick={() => copyToClipboard(hrData.generatedUsername)}>
+                <Copy size={16} />
+              </button>
+            </div>
+
+            <div className="flex items-center justify-between mb-4">
+              <p>
+                <strong>Password:</strong> {hrData.generatedPassword}
+              </p>
+              <button onClick={() => copyToClipboard(hrData.generatedPassword)}>
+                <Copy size={16} />
+              </button>
+            </div>
+
+            <div>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={confirmSaved}
+                  onChange={(e) => setConfirmSaved(e.target.checked)}
+                />
+                Saya sudah menyimpan informasi login
+              </label>
+            </div>
+
+            <button
+              onClick={() => {
+                if (confirmSaved) setShowModal(false);
+                else alert("Silakan centang kotak konfirmasi sebelum menutup!");
+              }}
+              disabled={!confirmSaved}
+              className={`mt-4 w-full px-4 py-2 text-white rounded transition ${
+                confirmSaved
+                  ? "bg-blue-600 hover:bg-blue-700"
+                  : "bg-gray-400 cursor-not-allowed"
+              }`}
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -112,14 +216,6 @@ function JobCard({ job, router }) {
           </p>
 
           <div className="flex gap-3 mt-4">
-            {/* <button
-              onClick={() => router.push(`/company/job-posting/${job.id}/edit`)}
-              className="px-6 py-3 border border-blue-600 text-blue-600 rounded-xs text-sm 
-              hover:bg-blue-50 transition"
-            >
-              Edit Postingan
-            </button> */}
-
             <button
               onClick={() => router.push(`/company/job-posting/${job.id}`)}
               className="px-6 py-3 bg-blue-600 text-white rounded-xs text-sm 

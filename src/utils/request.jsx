@@ -1,6 +1,6 @@
 import axios from "axios";
 import Cookies from "js-cookie";
-import { jwtDecode } from "jwt-decode";
+import jwtDecode from "jwt-decode";
 
 export function getCurrentUser() {
   try {
@@ -10,7 +10,7 @@ export function getCurrentUser() {
     const decoded = jwtDecode(token);
     return {
       id: decoded.id,
-      email: decoded.email,
+      email: decoded.sub || decoded.email, 
       role: decoded.role,
     };
   } catch (err) {
@@ -18,35 +18,25 @@ export function getCurrentUser() {
     return null;
   }
 }
+
 const request = axios.create({
   baseURL: process.env.NEXT_PUBLIC_HOST + "/api",
   timeout: 60000,
   headers: {
     "Content-Type": "application/json",
   },
-});
-
-request.interceptors.request.use((config) => {
-  const token = Cookies.get("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
+  withCredentials: true, 
 });
 
 request.interceptors.response.use(
   (res) => res,
   (error) => {
     if (error.response?.status === 401) {
-      const isLoginRequest = error.config.url.includes("/auth/session");
-      if (!isLoginRequest) {
-        Cookies.remove("token");
-        if (typeof window !== "undefined") {
-          window.location.href = "/login";
-        }
+      Cookies.remove("token");
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
       }
     }
-
     return Promise.reject(error);
   }
 );
@@ -56,12 +46,7 @@ export default {
     request({ method: "get", url, params, headers }),
 
   post: (url, data, headers = {}) =>
-    request({
-      method: "post",
-      url,
-      data,
-      headers,
-    }),
+    request({ method: "post", url, data, headers }),
 
   put: (url, data, headers = {}) =>
     request({ method: "put", url, data, headers }),

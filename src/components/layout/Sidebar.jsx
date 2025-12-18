@@ -24,6 +24,8 @@ import {
   SidebarProvider,
 } from "@/components/ui/sidebar";
 
+import { getCurrentUser } from "@/utils/request";
+
 export const sidebarData = {
   pencariKerja: {
     user: {
@@ -106,6 +108,14 @@ export const sidebarData = {
 
 export function SidebarPencariKerja(props) {
   const data = sidebarData.pencariKerja;
+  const [user, setUser] = React.useState(null);
+
+  React.useEffect(() => {
+    const currentUser = getCurrentUser();
+    setUser(currentUser);
+  }, []);
+
+  console.log("Current User in SidebarPencariKerja:", user);
 
   return (
     <SidebarProvider>
@@ -123,7 +133,7 @@ export function SidebarPencariKerja(props) {
         </SidebarContent>
 
         <SidebarFooter className="px-4 pb-4">
-          <NavUser user={data.user} />
+          <NavUser user={user || data.user} />
         </SidebarFooter>
 
         <SidebarRail className="bg-bg-card border-l border-primary-50 dark:border-primary-100" />
@@ -134,6 +144,14 @@ export function SidebarPencariKerja(props) {
 
 export function SidebarPemberiKerja(props) {
   const data = sidebarData.pemberiKerja;
+  const [user, setUser] = React.useState(null);
+
+  React.useEffect(() => {
+    const currentUser = getCurrentUser();
+    setUser(currentUser);
+  }, []);
+
+  console.log("Current User in SidebarPemberiKerja:", user);
 
   return (
     <SidebarProvider>
@@ -151,7 +169,7 @@ export function SidebarPemberiKerja(props) {
         </SidebarContent>
 
         <SidebarFooter className="px-4 pb-4">
-          <NavUser user={data.user} />
+          <NavUser user={user || data.user} />
         </SidebarFooter>
 
         <SidebarRail className="bg-bg-card border-l border-primary-50 dark:border-primary-100" />
