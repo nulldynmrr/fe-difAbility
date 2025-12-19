@@ -1,6 +1,6 @@
 import axios from "axios";
 import Cookies from "js-cookie";
-import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 export function getCurrentUser() {
   try {
@@ -10,7 +10,7 @@ export function getCurrentUser() {
     const decoded = jwtDecode(token);
     return {
       id: decoded.id,
-      email: decoded.sub || decoded.email, 
+      email: decoded.sub || decoded.email,
       role: decoded.role,
     };
   } catch (err) {
@@ -25,7 +25,7 @@ const request = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true, 
+  withCredentials: true,
 });
 
 request.interceptors.response.use(
