@@ -48,7 +48,8 @@ export default function Home() {
             🌟 disability-friendly
           </span>
           <h1 className="text-5xl font-bold text-gray-900 mb-4 leading-tight">
-            Cari pekerjaan <span className="text-blue-600">dengan mudah</span>,<br />
+            Cari pekerjaan <span className="text-blue-600">dengan mudah</span>,
+            <br />
             tanpa halangan apa pun
           </h1>
           <p className="text-lg text-gray-600 mb-8">
@@ -64,12 +65,12 @@ export default function Home() {
         {/* Illustration Section */}
         <div className="flex justify-center">
           <div className="w-full max-w-2xl">
-            <DisabilityImage 
-              src="/assets/ilustrasi.svg" 
-              alt="ilustrasi aksesibilitas" 
-              width={600} 
-              height={250} 
-              rounded={false} 
+            <DisabilityImage
+              src="/assets/ilustrasi.svg"
+              alt="ilustrasi aksesibilitas"
+              width={600}
+              height={250}
+              rounded={false}
             />
           </div>
         </div>

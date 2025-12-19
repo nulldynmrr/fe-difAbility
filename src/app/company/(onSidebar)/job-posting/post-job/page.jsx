@@ -12,7 +12,6 @@ import Button from "@/components/ui/Button";
 import HeaderCard from "@/components/card/HeaderCard";
 import { z } from "zod";
 
-/* ================= VALIDATION ================= */
 const postJobSchema = z.object({
   title: z.string().min(3, "Minimal 3 karakter"),
   description: z.string().min(10, "Minimal 10 karakter"),
@@ -24,11 +23,8 @@ const postJobSchema = z.object({
   publicationStatus: z.string().min(1, "Status publikasi wajib"),
 });
 
-/* ================= COMPONENT ================= */
 export default function PostJob() {
   const router = useRouter();
-
-  /* ===== FORM STATE ===== */
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -42,13 +38,10 @@ export default function PostJob() {
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-
-  /* ===== ENUM OPTIONS ===== */
   const [educationOptions, setEducationOptions] = useState([]);
   const [disabilityOptions, setDisabilityOptions] = useState([]);
   const [publicationOptions, setPublicationOptions] = useState([]);
 
-  /* ================= FETCH ENUM ================= */
   useEffect(() => {
     request
       .get("/enums/education-levels")
@@ -69,7 +62,6 @@ export default function PostJob() {
       );
   }, []);
 
-  /* ================= HANDLER ================= */
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
@@ -85,7 +77,6 @@ export default function PostJob() {
     handleChange("salary", raw);
   };
 
-  /* ================= SUBMIT ================= */
   const onSubmit = async () => {
     if (loading) return;
     setLoading(true);
@@ -112,7 +103,7 @@ export default function PostJob() {
       minimumYearsExperience: Number(form.minimumYearsExperience),
       compatibleDisabilities: form.compatibleDisabilities,
       registrationDeadline: `${form.registrationDeadline}T23:59:59`,
-      publicationStatus: form.publicationStatus, // ✅ DARI API ENUM
+      publicationStatus: form.publicationStatus, 
     };
 
     console.log("POST /api/jobs payload:", payload);
@@ -128,7 +119,6 @@ export default function PostJob() {
     }
   };
 
-  /* ================= UI ================= */
   return (
     <div className="min-h-screen p-6 mt-10">
       <HeaderCard

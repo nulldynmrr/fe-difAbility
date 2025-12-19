@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Menu, X, User, Building, ChevronDown, LogOut } from "lucide-react";
 import Cookies from "js-cookie";
 import request, { getCurrentUser } from "@/utils/request";
+import Image from "@/components/ui/Image";
 
 const MenuNav = ({ isMobile = false, onClickLink }) => {
   const menuItems = [
@@ -63,7 +64,13 @@ export default function Navbar() {
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <span className="text-2xl font-bold text-primary-300">disLok</span>
+            <Image
+              src="/assets/LOGO DIFABILITY.png"
+              alt="Logo disLok"
+              width={120}
+              height={40}
+              priority
+            />
           </div>
 
           <MenuNav />
