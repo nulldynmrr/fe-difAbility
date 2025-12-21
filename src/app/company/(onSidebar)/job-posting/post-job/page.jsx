@@ -12,16 +12,15 @@ import Button from "@/components/ui/Button";
 import HeaderCard from "@/components/card/HeaderCard";
 import { z } from "zod";
 
-const postJobSchema = z.object({
-  title: z.string().min(3, "Minimal 3 karakter"),
-  description: z.string().min(10, "Minimal 10 karakter"),
-  salary: z.string().min(1, "Gaji wajib diisi"),
-  minimumEducation: z.string().min(1, "Pilih pendidikan"),
-  minimumYearsExperience: z.string().min(1, "Wajib diisi"),
-  compatibleDisabilities: z.array(z.string()).min(1, "Pilih minimal 1"),
-  registrationDeadline: z.string().min(1, "Deadline wajib"),
-  publicationStatus: z.string().min(1, "Status publikasi wajib"),
-});
+// const postJobSchema = z.object({
+//   title: z.string().min(3, "Minimal 3 karakter"),
+//   description: z.string().min(10, "Minimal 10 karakter"),
+//   salary: z.string().min(1, "Gaji wajib diisi"),
+//   minimumEducation: z.string().min(1, "Pilih pendidikan"),
+//   minimumYearsExperience: z.string().min(1, "Wajib diisi"),
+//   compatibleDisabilities: z.array(z.string()).min(1, "Pilih minimal 1"),
+//   registrationDeadline: z.string().min(1, "Deadline wajib"),
+// });
 
 export default function PostJob() {
   const router = useRouter();
@@ -33,14 +32,14 @@ export default function PostJob() {
     minimumYearsExperience: "",
     compatibleDisabilities: [],
     registrationDeadline: "",
-    publicationStatus: "",
+    jobType: "",
   });
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [educationOptions, setEducationOptions] = useState([]);
   const [disabilityOptions, setDisabilityOptions] = useState([]);
-  const [publicationOptions, setPublicationOptions] = useState([]);
+  const [jobTypeOptions, setJobTypeOptions] = useState([]);
 
   useEffect(() => {
     request
@@ -59,6 +58,12 @@ export default function PostJob() {
       .get("/enums/publication-statuses")
       .then((res) =>
         setPublicationOptions(res.data.map((v) => ({ label: v, value: v })))
+      );
+
+    request
+      .get("/enums/job-types")
+      .then((res) =>
+        setJobTypeOptions(res.data.map((v) => ({ label: v, value: v })))
       );
   }, []);
 
@@ -83,27 +88,27 @@ export default function PostJob() {
     setErrors({});
     toast.dismiss();
 
-    const validation = postJobSchema.safeParse(form);
-    if (!validation.success) {
-      const errMap = {};
-      validation.error.issues.forEach((i) => {
-        errMap[i.path[0]] = i.message;
-      });
-      setErrors(errMap);
-      toast.error("Lengkapi semua field");
-      setLoading(false);
-      return;
-    }
+    // const validation = postJobSchema.safeParse(form);
+    // if (!validation.success) {
+    //   const errMap = {};
+    //   validation.error.issues.forEach((i) => {
+    //     errMap[i.path[0]] = i.message;
+    //   });
+    //   setErrors(errMap);
+    //   toast.error("Lengkapi semua field");
+    //   setLoading(false);
+    //   return;
+    // }
 
     const payload = {
       title: form.title,
-      description: form.description,
+      jobDescription: form.description,
       salary: Number(form.salary),
       minimumEducation: form.minimumEducation,
       minimumYearsExperience: Number(form.minimumYearsExperience),
       compatibleDisabilities: form.compatibleDisabilities,
       registrationDeadline: `${form.registrationDeadline}T23:59:59`,
-      publicationStatus: form.publicationStatus, 
+      jobType: form.jobType,
     };
 
     console.log("POST /api/jobs payload:", payload);
@@ -165,7 +170,7 @@ export default function PostJob() {
 
           <Input
             type="number"
-            label="Pengalaman (Tahun)"
+            label="Pengalaman Kerja (Tahun)"
             value={form.minimumYearsExperience}
             onChange={(e) =>
               handleChange("minimumYearsExperience", e.target.value.slice(0, 2))
@@ -180,6 +185,13 @@ export default function PostJob() {
             onChange={(v) => handleChange("compatibleDisabilities", v)}
             error={errors.compatibleDisabilities}
           />
+          <InputDropdown
+            label="Tipe Pekerjaan"
+            options={jobTypeOptions}
+            value={form.jobType}
+            onChange={(v) => handleChange("jobType", v)}
+            error={errors.jobType}
+          />
 
           <Input
             type="date"
@@ -189,14 +201,6 @@ export default function PostJob() {
               handleChange("registrationDeadline", e.target.value)
             }
             error={errors.registrationDeadline}
-          />
-
-          <InputDropdown
-            label="Status Publikasi"
-            options={publicationOptions}
-            value={form.publicationStatus}
-            onChange={(v) => handleChange("publicationStatus", v)}
-            error={errors.publicationStatus}
           />
         </div>
 

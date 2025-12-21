@@ -104,7 +104,7 @@ export default function Login() {
         return;
       }
 
-      const res = await request.post("/auth/sessions", formData);
+      const res = await request.post("/auth/session", formData);
 
       if (res.status === 200 || res.status === 201) {
         const data = res.data;
