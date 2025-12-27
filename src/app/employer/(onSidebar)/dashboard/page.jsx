@@ -1,111 +1,128 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-import SpeechSearchBar from "@/components/ui/Search";
-import DisabilityImage from "@/components/ui/Image";
-import { MapPin, DollarSign } from "lucide-react";
-import JobCard from "@/components/card/JobCard";
-import request from "@/utils/request";
+import React, { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import HeaderCard from "@/components/card/HeaderCard";
+import OpenJobs from "@/components/card/OpenJobSection";
+import { Edit } from "lucide-react";
 import { toast } from "sonner";
+import request from "@/utils/request";
+import { transformCompanyData } from "@/utils/fileUtils";
+import { useAuthMe } from "@/hooks/useAuthMe";
 
 export default function Dashboard() {
+  const router = useRouter();
+  const data = useAuthMe();
   const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [company, setCompany] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchAllJobs = useCallback(async () => {
-    setLoading(true);
     try {
-      const response = await request.get("/jobs");
-      setJobs(response.data || []);
-    } catch (err) {
-      if (err.response) {
-        toast.dismiss();
-        setJobs([]);
-      } else {
-        toast.error("Gagal memuat data lowongan");
-      }
-    } finally {
-      setLoading(false);
+      const jobsRes = await request.get("/jobs");
+      setJobs(jobsRes.data || []);
+    } catch (error) {
+      console.error("Error fetching jobs:", error);
+      toast.error("Gagal mengambil data lowongan");
     }
   }, []);
 
+  const fetchCompany = useCallback(async () => {
+    if (!data?.user?.companyId) return;
+
+    setLoading(true);
+    try {
+      const res = await request.get(
+        `/companies/${data.user.companyId}/profile`
+      );
+      const transformedCompany = transformCompanyData(res.data);
+      setCompany(transformedCompany);
+    } catch (error) {
+      console.error("Error fetching company:", error);
+      toast.error("Gagal mengambil data perusahaan");
+    } finally {
+      setLoading(false);
+    }
+  }, [data?.user?.companyId]);
+
   useEffect(() => {
     fetchAllJobs();
-  }, [fetchAllJobs]);
+    fetchCompany();
+  }, [fetchAllJobs, fetchCompany]);
+
+  const totalPosting = jobs.length;
+  const stillOpen = jobs.filter(
+    (job) => job.publicationStatus === "OPEN"
+  ).length;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-text-secondary">
+        Memuat dashboard...
+      </div>
+    );
+  }
+
+  console.log(company, "COMPANY");
+
   return (
-    <main className="p-6">
-      <section className="bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg p-8 text-white mb-8">
-        <div className="max-w-6xl mx-auto flex items-center gap-8">
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold mb-2">
-              Cari pekerjaan dengan mudah, tanpa halangan apa pun
-            </h1>
-            <p className="text-sm opacity-90">
-              Ribuan lowongan dari perusahaan yang peduli aksesibilitas
+    <div className="min-h-screen p-6 mt-10 bg-bg">
+      <HeaderCard
+        title="Siap memberi banyak lowongan pekerjaan"
+        subtitle="Meningkatkan kepercayaan kepada disabilitas"
+      />
+
+      {company && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 my-8">
+          <div className="bg-bg-card p-6 md:col-span-2 flex justify-between items-center rounded-lg border border-border/40">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 bg-border rounded-lg overflow-hidden flex items-center justify-center">
+                {company.logoImagePath ? (
+                  <img
+                    src={company.logoImagePath}
+                    alt={`Logo ${company.companyName}`}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      console.error(
+                        "Image failed to load:",
+                        company.logoImagePath
+                      );
+                      e.target.style.display = "none";
+                      e.target.parentElement.innerHTML =
+                        '<span class="text-text-secondary text-sm">Logo</span>';
+                    }}
+                  />
+                ) : (
+                  <span className="text-text-secondary text-sm">Logo</span>
+                )}
+              </div>
+
+              <div>
+                <p className="font-semibold text-2xl text-text-primary">
+                  {company.companyName || "Perusahaan"}
+                </p>
+                <p className="text-text-secondary text-xs line-clamp-2">
+                  {company.industryType}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-bg-card p-6 text-center rounded-lg border border-border/40">
+            <p className="text-3xl font-bold text-text-primary">
+              {totalPosting}
             </p>
-
-            <div className="mt-6">
-              <SpeechSearchBar placeholder="saya mau kerja.." />
-            </div>
+            <p className="text-xs text-text-secondary">Posting Lamaran</p>
           </div>
 
-          <div className="w-56 hidden md:block">
-            <DisabilityImage
-              src="/assets/ilustrasi.svg"
-              alt="illustration"
-              width={220}
-              height={140}
-              rounded={false}
-            />
+          <div className="bg-bg-card p-6 text-center rounded-lg border border-border/40">
+            <p className="text-3xl font-bold text-text-primary">{stillOpen}</p>
+            <p className="text-xs text-text-secondary">Sedang berjalan</p>
           </div>
         </div>
-      </section>
+      )}
 
-      <section className="max-w-6xl mx-auto grid grid-cols-12 gap-6">
-        <aside className="col-span-3 bg-bg-card border border-primary-50 rounded-lg p-4">
-          <h4 className="font-semibold mb-4">Filter</h4>
-
-          <ul className="space-y-3 text-sm text-primary-400">
-            <li className="flex items-center gap-3">
-              <MapPin className="w-4 h-4" /> Jakarta Selatan
-            </li>
-            <li className="flex items-center gap-3">
-              <DollarSign className="w-4 h-4" /> 12 juta
-            </li>
-            <li className="flex items-center gap-3">Remmote</li>
-            <li className="flex items-center gap-3">Remmote</li>
-          </ul>
-        </aside>
-
-        <div className="col-span-9 space-y-6">
-          {loading ? (
-            <div className="text-center py-8">
-              <p className="text-gray-500">Memuat lowongan...</p>
-            </div>
-          ) : jobs.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-gray-500">Belum ada lowongan tersedia</p>
-            </div>
-          ) : (
-            jobs.map((job) => (
-              <JobCard
-                key={job.id}
-                title={job.title}
-                company={job.company?.name || "Company"}
-                location={job.company?.address || "Location"}
-                salary={
-                  job.salary
-                    ? `Rp ${job.salary.toLocaleString("id-ID")}`
-                    : "Negotiable"
-                }
-                remote={job.jobType === "Remote" || false}
-                description={job.description || job.jobDescription || ""}
-              />
-            ))
-          )}
-        </div>
-      </section>
-    </main>
+      <OpenJobs jobs={jobs} />
+    </div>
   );
 }

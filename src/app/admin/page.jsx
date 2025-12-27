@@ -1,113 +1,98 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import SpeechSearchBar from "@/components/ui/Search";
-import DisabilityImage from "@/components/ui/Image";
-import { MapPin, DollarSign } from "lucide-react";
-import JobCard from "@/components/card/JobCard";
 import request from "@/utils/request";
 import { toast } from "sonner";
 
 export default function Dashboard() {
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [logs, setLogs] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const fetchAllJobs = useCallback(async () => {
-    setLoading(true);
+  const fetchAllLogs = useCallback(async () => {
+    setIsLoading(true);
     try {
-      const response = await request.get("/activity-logs");
-      setJobs(response.data || []);
+      const response = await request.get("/logs");
+      setLogs(response.data || []);
     } catch (err) {
-      if (err.response) {
-        toast.dismiss();
-        setJobs([]);
-      } else {
-        toast.error("Gagal memuat data lowongan");
-      }
+      toast.dismiss();
+      setLogs([]);
+      toast.error("Gagal memuat activity log");
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchAllJobs();
-  }, [fetchAllJobs]);
+    fetchAllLogs();
+  }, [fetchAllLogs]);
 
-  console.log(jobs);
+  if (isLoading) {
+    return <p>Memuat aktivitas...</p>;
+  }
+
   return (
-    <main className="p-6">
-      <section className="bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg p-8 text-white mb-8">
-        <div className="max-w-6xl mx-auto flex items-center gap-8">
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold mb-2">
-              Cari pekerjaan dengan mudah, tanpa halangan apa pun
-            </h1>
-            <p className="text-sm opacity-90">
-              Ribuan lowongan dari perusahaan yang peduli aksesibilitas
-            </p>
+    <section className="mt-12">
+      <h1 className="text-2xl font-bold mb-4">Activity Logs</h1>
 
-            <div className="mt-6">
-              <SpeechSearchBar placeholder="saya mau kerja.." />
+      {logs.length > 0 ? (
+        <div className="space-y-3">
+          {logs.map((log) => (
+            <div
+              key={log.id}
+              className="flex items-start gap-4 p-3 rounded-lg bg-sidebar/20 border border-black/10 dark:border-white/10"
+            >
+              <div className="w-9 h-9 flex items-center justify-center bg-muted rounded-full flex-shrink-0">
+                <span className="font-bold text-sm">
+                  {log.actorUsername?.charAt(0)}
+                </span>
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <p className="font-medium truncate">{log.actorUsername}</p>
+                <p className="text-sm text-muted-foreground">
+                  {log.actorRole}
+                </p>
+                {log.description && (
+                  <p className="text-xs italic text-muted-foreground mt-1">
+                    {log.description}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                <span
+                  className={`text-xs font-semibold px-2 py-1 rounded-md text-white ${
+                    log.actorAction.includes("CREATE")
+                      ? "bg-green-500"
+                      : log.actorAction.includes("UPDATE")
+                      ? "bg-blue-500"
+                      : log.actorAction.includes("DELETE")
+                      ? "bg-red-500"
+                      : log.actorAction.includes("VIEW")
+                      ? "bg-yellow-500"
+                      : log.actorAction.includes("LOGIN")
+                      ? "bg-purple-500"
+                      : "bg-gray-400"
+                  }`}
+                >
+                  {log.actorAction}
+                </span>
+
+                <span className="text-muted-foreground text-xs">
+                  {new Date(log.createdAt).toLocaleString("id-ID", {
+                    day: "2-digit",
+                    month: "short",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+              </div>
             </div>
-          </div>
-
-          <div className="w-56 hidden md:block">
-            <DisabilityImage
-              src="/assets/ilustrasi.svg"
-              alt="illustration"
-              width={220}
-              height={140}
-              rounded={false}
-            />
-          </div>
+          ))}
         </div>
-      </section>
-
-      <section className="max-w-6xl mx-auto grid grid-cols-12 gap-6">
-        <aside className="col-span-3 bg-bg-card border border-primary-50 rounded-lg p-4">
-          <h4 className="font-semibold mb-4">Filter</h4>
-
-          <ul className="space-y-3 text-sm text-primary-400">
-            <li className="flex items-center gap-3">
-              <MapPin className="w-4 h-4" /> Jakarta Selatan
-            </li>
-            <li className="flex items-center gap-3">
-              <DollarSign className="w-4 h-4" /> 12 juta
-            </li>
-            <li className="flex items-center gap-3">Remmote</li>
-            <li className="flex items-center gap-3">Remmote</li>
-          </ul>
-        </aside>
-
-        <div className="col-span-9 space-y-6">
-          {loading ? (
-            <div className="text-center py-8">
-              <p className="text-gray-500">Memuat lowongan...</p>
-            </div>
-          ) : jobs.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-gray-500">Belum ada lowongan tersedia</p>
-            </div>
-          ) : (
-            jobs.map((job) => (
-              <JobCard
-                key={job.id}
-                title={job.title}
-                company={job.company?.name || "Company"}
-                location={job.company?.address || "Location"}
-                salary={
-                  job.salary
-                    ? `Rp ${job.salary.toLocaleString("id-ID")}`
-                    : "Negotiable"
-                }
-                remote={job.jobType === "Remote" || false}
-                description={job.description || job.jobDescription || ""}
-              />
-            ))
-          )}
-        </div>
-      </section>
-    </main>
+      ) : (
+        <p>Tidak ada aktivitas terbaru.</p>
+      )}
+    </section>
   );
 }

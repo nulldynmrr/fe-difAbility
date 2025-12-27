@@ -1,22 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export default function InputDropdown({
   label,
   options = [],
   value,
   onChange,
-  shortcutLabel,
   className = "",
   error,
 }) {
   const [open, setOpen] = useState(false);
+  const wrapperRef = useRef(null);
 
   const selectedOption = options.find((o) => o.value === value);
 
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
-    <div className={`w-full flex flex-col gap-1 relative ${className}`}>
+    <div
+      ref={wrapperRef}
+      className={`w-full flex flex-col gap-1 relative mb-1 ${className}`}
+    >
       {label && (
         <label className="text-sm font-medium text-primary-300">{label}</label>
       )}
@@ -25,19 +39,20 @@ export default function InputDropdown({
         className={`border rounded-md p-2 cursor-pointer bg-bg-card text-primary-900 ${
           error ? "border-red-500" : "border-primary-100"
         }`}
-        onClick={() => setOpen(!open)}
+        onClick={() => setOpen((p) => !p)}
       >
         {selectedOption ? selectedOption.label : "Pilih..."}
       </div>
 
       {open && (
-        <div className="absolute z-10 w-full border border-primary-100 bg-bg-card rounded-md mt-1 shadow-lg max-h-60 overflow-auto">
+        <div className="absolute z-20 w-full border border-primary-100 bg-bg-card rounded-md mt-1 shadow-lg max-h-60 overflow-auto">
           {options.map((option) => (
             <div
               key={option.value}
               className="p-2 hover:bg-primary-50 cursor-pointer text-primary-900"
-              onClick={() => {
-                onChange(option.value); // value kapital dikirim ke BE
+              onClick={(e) => {
+                e.stopPropagation();
+                onChange(option.value);
                 setOpen(false);
               }}
             >

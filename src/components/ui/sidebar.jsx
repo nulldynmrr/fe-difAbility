@@ -414,41 +414,50 @@ const sidebarMenuButtonVariants = cva(
     defaultVariants: { variant: "default", size: "default" },
   }
 );
-function SidebarMenuButton({
-  asChild = false,
-  isActive = false,
-  variant = "default",
-  size = "default",
-  tooltip,
-  className,
-  ...props
-}) {
-  const Comp = asChild ? Slot : "button";
-  const { isMobile, state } = useSidebar();
-  const button = (
-    <Comp
-      data-slot="sidebar-menu-button"
-      data-sidebar="menu-button"
-      data-size={size}
-      data-active={isActive}
-      className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
-      {...props}
-    />
-  );
-  if (!tooltip) return button;
-  if (typeof tooltip === "string") tooltip = { children: tooltip };
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>{button}</TooltipTrigger>
-      <TooltipContent
-        side="right"
-        align="center"
-        hidden={state !== "collapsed" || isMobile}
-        {...tooltip}
+const SidebarMenuButton = React.forwardRef(
+  (
+    {
+      asChild = false,
+      isActive = false,
+      variant = "default",
+      size = "default",
+      tooltip,
+      className,
+      ...props
+    },
+    ref
+  ) => {
+    const Comp = asChild ? Slot : "button";
+    const { isMobile, state } = useSidebar();
+
+    const button = (
+      <Comp
+        ref={ref}
+        data-slot="sidebar-menu-button"
+        data-sidebar="menu-button"
+        data-size={size}
+        data-active={isActive}
+        className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
+        {...props}
       />
-    </Tooltip>
-  );
-}
+    );
+
+    if (!tooltip) return button;
+    if (typeof tooltip === "string") tooltip = { children: tooltip };
+
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>{button}</TooltipTrigger>
+        <TooltipContent
+          side="right"
+          align="center"
+          hidden={state !== "collapsed" || isMobile}
+          {...tooltip}
+        />
+      </Tooltip>
+    );
+  }
+);
 
 function SidebarMenuAction({
   className,
@@ -484,9 +493,6 @@ function SidebarMenuBadge({ className, ...props }) {
   );
 }
 function SidebarMenuSkeleton({ className, showIcon = false, ...props }) {
-  // Avoid non-deterministic values during SSR which cause hydration
-  // mismatches. Use a stable default on the server and set a
-  // randomized value only on the client after mount.
   const [width, setWidth] = React.useState("60%");
 
   React.useEffect(() => {

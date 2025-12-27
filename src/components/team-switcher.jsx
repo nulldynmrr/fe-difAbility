@@ -22,18 +22,6 @@ export function TeamSwitcher({ teams = [] }) {
   const { isMobile } = useSidebar();
   const [activeTeam, setActiveTeam] = React.useState(teams[0] || null);
 
-  if (!activeTeam) {
-    return (
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <SidebarMenuButton size="lg" disabled>
-            <div className="text-sm text-muted-foreground">No teams found</div>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      </SidebarMenu>
-    );
-  }
-
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -60,53 +48,6 @@ export function TeamSwitcher({ teams = [] }) {
               <ChevronsUpDown className="ml-auto" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
-
-          <DropdownMenuContent
-            className="
-    w-radix-dropdown-menu-trigger-width 
-    min-w-56 
-    rounded-lg 
-    bg-[#FAFAFA]
-    dark:bg-[#1f1f1f] 
-    border 
-   border-black/10 dark:border-white/10
-    shadow-lg
-  "
-            align="start"
-            side={isMobile ? "bottom" : "right"}
-            sideOffset={4}
-          >
-            <DropdownMenuLabel className="text-xs text-muted-foreground">
-              Teams
-            </DropdownMenuLabel>
-
-            {teams.map((team, index) => (
-              <DropdownMenuItem
-                key={team.name}
-                onClick={() => setActiveTeam(team)}
-                className="gap-2 p-2 hover:bg-gray-100 dark:hover:bg-[#2a2a2a]"
-              >
-                <div className="flex size-6 items-center justify-center rounded-md border dark:border-gray-700">
-                  <img
-                    src={team.logo}
-                    alt={team.name}
-                    className="size-3.5 shrink-0 object-contain"
-                  />
-                </div>
-                <div className="flex-1 truncate">{team.name}</div>
-                <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
-              </DropdownMenuItem>
-            ))}
-
-            <DropdownMenuSeparator />
-
-            <DropdownMenuItem className="gap-2 p-2 hover:bg-gray-100 dark:hover:bg-[#2a2a2a]">
-              <div className="flex size-6 items-center justify-center rounded-md border bg-transparent dark:border-gray-700">
-                <Plus className="size-4" />
-              </div>
-              <div className="font-medium text-muted-foreground">Add team</div>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>

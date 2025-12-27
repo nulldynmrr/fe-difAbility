@@ -1,17 +1,16 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Menu, X, User, Building, ChevronDown, LogOut } from "lucide-react";
-import Cookies from "js-cookie";
-import request, { getCurrentUser } from "@/utils/request";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "@/components/ui/Image";
+import { Menu, X, User, Building, ChevronDown, LogOut } from "lucide-react";
+import request, { clearAuth } from "@/utils/request";
+import { useAuthMe } from "@/hooks/useAuthMe";
 
 const MenuNav = ({ isMobile = false, onClickLink }) => {
   const menuItems = [
     { label: "Beranda", href: "/" },
-    { label: "Lowongan", href: "/jobs" },
-    { label: "Perusahaan", href: "/job-seeker/dasboard" },
-    { label: "Tentang", href: "/about" },
+    { label: "Lowongan", href: "/job-seeker/dashboard" },
+    { label: "Tentang", href: "/" },
   ];
 
   return (
@@ -25,11 +24,11 @@ const MenuNav = ({ isMobile = false, onClickLink }) => {
           key={item.href}
           href={item.href}
           onClick={onClickLink}
-          className={`${
+          className={
             isMobile
               ? "block px-3 py-2 text-text-primary hover:text-primary-300 hover:bg-primary-50 rounded-lg font-medium"
               : "text-text-primary hover:text-primary-300 font-medium"
-          }`}
+          }
         >
           {item.label}
         </a>
@@ -39,44 +38,51 @@ const MenuNav = ({ isMobile = false, onClickLink }) => {
 };
 
 export default function Navbar() {
+  const { user, loading } = useAuthMe();
   const [isOpen, setIsOpen] = useState(false);
   const [dropdown, setDropdown] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
+  const dropdownRef = useRef(null);
 
-  useEffect(() => {
-    const user = getCurrentUser();
-    setCurrentUser(user);
-  }, []);
-
-  const handleLogout = async () => {
+  const onLogout = async () => {
     try {
+      clearAuth();
       await request.delete("/auth/session");
     } catch (err) {
       console.log("Logout error (ignored):", err);
     }
-
-    Cookies.remove("token");
     window.location.href = "/login";
   };
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <nav className="bg-bg-card border-b border-border fixed w-full top-0 z-50">
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <Image
-              src="/assets/LOGO DIFABILITY.png"
-              alt="Logo disLok"
-              width={120}
-              height={40}
-              priority
-            />
+            <a href="/">
+              <Image
+                src="/assets/LOGO DIFABILITY.png"
+                alt="Logo"
+                width={120}
+                height={40}
+                priority
+              />
+            </a>
           </div>
 
           <MenuNav />
 
           <div className="hidden md:flex items-center space-x-4">
-            {!currentUser && (
+            {!loading && !user && (
               <>
                 <a
                   href="/login"
@@ -87,8 +93,8 @@ export default function Navbar() {
                 </a>
 
                 <a
-                  href="/register-company"
-                  className="flex items-center space-x-2 px-4 py-2 bg-primary-300 text-white rounded-lg hover:bg-primary-300"
+                  href="/registration-company"
+                  className="flex items-center space-x-2 px-4 py-2 bg-primary-300 text-white rounded-lg hover:bg-primary-400 transition-colors"
                 >
                   <Building className="w-4 h-4" />
                   <span>Daftar Perusahaan</span>
@@ -96,36 +102,54 @@ export default function Navbar() {
               </>
             )}
 
-            {currentUser && (
-              <div className="relative">
+            {!loading && user && (
+              <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setDropdown(!dropdown)}
-                  className="flex items-center space-x-2 px-4 py-2 text-text-primary hover:text-primary-300"
+                  className="flex items-center space-x-2 px-4 py-2 text-text-primary hover:text-primary-300 transition-colors"
                 >
                   <User className="w-4 h-4" />
-                  <span>{currentUser?.email?.split("@")[0] ?? "User"}</span>
-                  <ChevronDown className="w-4 h-4" />
+                  <span className="max-w-[150px] truncate">
+                    {user.fullName || "User"}
+                  </span>
+                  <ChevronDown
+                    className={`w-4 h-4 transition-transform ${
+                      dropdown ? "rotate-180" : ""
+                    }`}
+                  />
                 </button>
 
                 {dropdown && (
                   <div
-                    className="absolute right-0 mt-2 rounded-lg border w-40 py-2 shadow-lg"
+                    className="absolute right-0 mt-4 rounded-lg w-48 py-2 border !border-border/40"
                     style={{
                       backgroundColor: "rgb(var(--bg-card))",
                       borderColor: "rgb(var(--border))",
                       color: "rgb(var(--text-primary))",
                     }}
                   >
+                    <div className="px-4 py-2 border-b border-border">
+                      <p className="text-sm font-medium truncate">
+                        {user.fullName || "User"}
+                      </p>
+                      <p className="text-xs text-text-secondary truncate">
+                        {user.email}
+                      </p>
+                    </div>
+
                     <a
-                      href="/profile"
+                      href={
+                        user.role === "Job Seeker"
+                          ? "/job-seeker/update-profile"
+                          : "/profile-company"
+                      }
                       className="px-4 py-2 block rounded hover:bg-[rgb(var(--primary-50))] transition-colors"
-                      style={{ color: "rgb(var(--text-primary))" }}
                     >
-                      Profile
+                      Update Profile
                     </a>
 
                     <button
-                      onClick={handleLogout}
+                      onClick={onLogout}
                       className="px-4 py-2 w-full text-left flex items-center space-x-2 rounded hover:bg-[rgb(var(--primary-50))] transition-colors"
                       style={{ color: "rgb(var(--destructive))" }}
                     >
@@ -158,7 +182,7 @@ export default function Navbar() {
           <div className="px-4 pt-2 pb-4">
             <MenuNav isMobile onClickLink={() => setIsOpen(false)} />
 
-            {!currentUser && (
+            {!loading && !user && (
               <div className="pt-3 border-t border-border space-y-2">
                 <a
                   href="/login"
@@ -169,7 +193,7 @@ export default function Navbar() {
                 </a>
 
                 <a
-                  href="/employer/registration-company"
+                  href="/registration-company"
                   className="flex items-center space-x-2 px-3 py-2 bg-primary-300 text-white rounded-lg"
                 >
                   <Building className="w-4 h-4" />
@@ -178,8 +202,29 @@ export default function Navbar() {
               </div>
             )}
 
-            {currentUser && (
+            {!loading && user && (
               <div className="pt-3 border-t border-border space-y-2">
+                <div className="px-3 py-2 bg-primary-50 rounded-lg">
+                  <p className="text-sm font-medium truncate">
+                    {user.fullName || "User"}
+                  </p>
+                  <p className="text-xs text-text-secondary truncate">
+                    {user.email}
+                  </p>
+                </div>
+
+                <a
+                  href={
+                    user.role === "Job Seeker"
+                      ? "/job-seeker/update-profile"
+                      : "/profile-company"
+                  }
+                  className="flex items-center space-x-2 px-3 py-2 hover:bg-primary-50 rounded-lg"
+                >
+                  <User className="w-4 h-4" />
+                  <span>Update Profile</span>
+                </a>
+
                 <a
                   href="/profile"
                   className="flex items-center space-x-2 px-3 py-2 hover:bg-primary-50 rounded-lg"
@@ -189,7 +234,7 @@ export default function Navbar() {
                 </a>
 
                 <button
-                  onClick={handleLogout}
+                  onClick={onLogout}
                   className="flex items-center space-x-2 px-3 py-2 text-red-500 hover:bg-primary-50 rounded-lg w-full text-left"
                 >
                   <LogOut className="w-4 h-4" />

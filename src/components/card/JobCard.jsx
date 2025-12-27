@@ -14,14 +14,20 @@ export default function JobCard({
   description,
 }) {
   return (
-    <article className="bg-bg-card border border-primary-50 rounded-lg p-6 shadow-sm" aria-labelledby={`job-${title.replace(/\s+/g, "-")}`}>
+    <article className="bg-bg-card border border-primary-50 rounded-lg p-6 shadow-sm">
       <div className="flex items-start gap-4">
-        <div className="w-16 h-16 bg-primary-50 rounded-md flex items-center justify-center" aria-hidden>
+        <div
+          className="w-16 h-16 bg-primary-50 rounded-md flex items-center justify-center"
+          aria-hidden
+        >
           <div className="w-12 h-12 bg-primary-100 rounded" />
         </div>
 
         <div className="flex-1">
-          <h3 id={`job-${title.replace(/\s+/g, "-")}`} className="text-xl font-semibold text-primary-900">
+          <h3
+            id={`job-${title.replace(/\s+/g, "-")}`}
+            className="text-xl font-semibold text-primary-900"
+          >
             {title}
           </h3>
 
@@ -43,7 +49,11 @@ export default function JobCard({
         </div>
 
         <div className="flex flex-col items-end gap-4">
-          <Button variant="primary" className="px-6 py-2" aria-label={`Lamar ke ${title}`}>
+          <Button
+            variant="primary"
+            className="px-6 py-2"
+            aria-label={`Lamar ke ${title}`}
+          >
             Lamar Kerja
           </Button>
         </div>

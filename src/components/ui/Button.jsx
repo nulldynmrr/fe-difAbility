@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useAccessibilityOptions } from "@/hooks/useAccessibilityOptions";
 import { speak } from "@/hooks/speech/voiceUtils";
 
@@ -11,6 +12,7 @@ export default function Button({
   shortcutLabel,
   voiceLabel,
   autoSpeak = false,
+  href,
   ...props
 }) {
   const { shortcuts, showShortcutLabels } = useAccessibilityOptions();
@@ -27,15 +29,9 @@ export default function Button({
     }, 400);
   }
 
-  return (
-    <button
-      onClick={onClick}
-      onFocus={handleFocus}
-      className={`${baseClass} ${className} cursor-pointer relative flex items-center justify-center gap-2 focus:ring-2 focus:ring-primary-100`}
-      aria-label={voiceLabel || children}
-    >
+  const buttonContent = (
+    <>
       {children}
-
       {shortcutLabel && showShortcutLabels && (
         <span
           className={`absolute right-3 text-xs font-mono border border-border rounded px-2 py-0.5
@@ -44,6 +40,31 @@ export default function Button({
           {shortcutLabel.toUpperCase()}
         </span>
       )}
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className={`${baseClass} ${className} cursor-pointer relative flex items-center justify-center gap-2 focus:ring-2 focus:ring-primary-100`}
+        aria-label={voiceLabel || children}
+        {...props}
+      >
+        {buttonContent}
+      </Link>
+    );
+  }
+
+  return (
+    <button
+      onClick={onClick}
+      onFocus={handleFocus}
+      className={`${baseClass} ${className} cursor-pointer relative flex items-center justify-center gap-2 focus:ring-2 focus:ring-primary-100`}
+      aria-label={voiceLabel || children}
+      {...props}
+    >
+      {buttonContent}
     </button>
   );
 }

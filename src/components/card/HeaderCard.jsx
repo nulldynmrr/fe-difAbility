@@ -20,11 +20,16 @@ export default function HeaderCard({
   const showedSearch = showSearch && !hideSearch;
 
   return (
-    <section className="relative min-h-[180px] bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg p-8 text-white overflow-hidden flex items-center">
+    <section className="relative min-h-[180px] bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg p-2 md:p-8 text-white overflow-hidden flex items-center">
       <div className="w-full max-w-6xl mx-auto flex items-center">
         <div className="flex-1 z-10">
-          <h1 className="text-3xl font-bold mb-2">{title}</h1>
-          <p className="text-sm opacity-90">{subtitle}</p>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2">
+            {title}
+          </h1>
+
+          <p className="text-xs sm:text-sm lg:text-base opacity-90">
+            {subtitle}
+          </p>
 
           {showedSearch && (
             <div className="mt-6 max-w-xl">

@@ -1,7 +1,7 @@
 "use client";
 
 import Navbar from "@/components/layout/Navbar";
-import { SidebarPemberiKerja } from "@/components/layout/Sidebar";
+import { SidebarAdmin } from "@/components/layout/Sidebar";
 
 export default function onSidebarAdmin({ children }) {
   return (
@@ -26,7 +26,7 @@ export default function onSidebarAdmin({ children }) {
             py-6
           "
         >
-          <SidebarPemberiKerja />
+          <SidebarAdmin />
         </aside>
 
         <main

@@ -94,7 +94,7 @@ export default function RegisterHumanResource() {
       const res = await request.post("/auth/registration", {
         email: formData.email,
         password: formData.password,
-        role: "Company", // 🔥 WAJIB
+        role: "Company", 
       });
 
       toast.success("Registrasi Human Resource berhasil!");
@@ -111,6 +111,15 @@ export default function RegisterHumanResource() {
 
   return (
     <div className="min-h-screen bg-bg flex">
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <div
+          className="absolute -top-1/3 -left-1/4 w-[900px] h-[900px] rounded-full opacity-90 blur-xl"
+          style={{
+            background: "linear-gradient(to right, #bfdbfe, #e0f2fe, #ffffff)",
+          }}
+        />
+        <div className="absolute -top-1/2 -left-1/2 w-[1200px] h-[1200px] rounded-full bg-sky-100 opacity-40 blur-[80px]" />
+      </div>
       <div className="hidden md:block w-1/2 relative">
         <Image src="/assets/ilustrasi.svg" alt="HR" fill />
       </div>

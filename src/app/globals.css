@@ -182,10 +182,46 @@
     font-size: 2.75rem;
   }
 
-  /* font dislexia */
+  @font-face {
+    font-family: "OpenDyslexic";
+    src: url("/fonts/OpenDyslexic-Regular.woff2") format("woff2"),
+      url("/fonts/OpenDyslexic-Regular.woff") format("woff");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: "OpenDyslexic";
+    src: url("/fonts/OpenDyslexic-Italic.woff2") format("woff2"),
+      url("/fonts/OpenDyslexic-Italic.woff") format("woff");
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: "OpenDyslexic";
+    src: url("/fonts/OpenDyslexic-Bold.woff2") format("woff2"),
+      url("/fonts/OpenDyslexic-Bold.woff") format("woff");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: "OpenDyslexic";
+    src: url("/fonts/OpenDyslexic-Bold-Italic.woff2") format("woff2"),
+      url("/fonts/OpenDyslexic-Bold-Italic.woff") format("woff");
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+  }
+
+  /* font disleksia */
   [data-dyslexia="true"],
   [data-dyslexia="true"] * {
-    font-family: "Lexend", Arial, sans-serif !important;
+    font-family: "OpenDyslexic", Arial, sans-serif !important;
     letter-spacing: 0.12em !important;
     word-spacing: 0.16em !important;
     line-height: 1.8 !important;

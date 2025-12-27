@@ -1,202 +1,131 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import request from "@/utils/request";
-import { toast } from "sonner";
-import { Calendar, Briefcase, Coins } from "lucide-react";
 import HeaderCard from "@/components/card/HeaderCard";
+import OpenJobs from "@/components/card/OpenJobSection";
+import { Edit } from "lucide-react";
+import { toast } from "sonner";
+import request from "@/utils/request";
+import { transformCompanyData } from "@/utils/fileUtils";
 
 export default function Dashboard() {
   const router = useRouter();
-  const [profile, setProfile] = useState(null);
   const [jobs, setJobs] = useState([]);
+  const [company, setCompany] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const [profileRes, jobsRes] = await Promise.all([
-          request.get("/companies/me/profile", { withCredentials: true }),
-          request.get("/jobs", { withCredentials: true }),
-        ]);
-
-        const data = profileRes.data;
-
-        const logoUrl = data.logoImgPath
-          ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/files/view?path=${data.logoImgPath}`
-          : null;
-
-        setProfile({
-          companyName: data.name || "-",
-          companyDescription: data.description || "-",
-          address: data.address || "-",
-          industryType: data.industryType || "-",
-          websiteUrl: data.websiteUrl || "-",
-          linkedinUrl: data.linkedinUrl || "-",
-          youtubeUrl: data.youtubeUrl || "-",
-          instagramUrl: data.instagramUrl || "-",
-          twitterUrl: data.twitterUrl || "-",
-          logoImagePath: logoUrl,
-          agreeToTerms: data.agreeToTerms || false,
-        });
-
-        setJobs(jobsRes.data || []);
-      } catch (error) {
-        toast.error("Gagal mengambil data perusahaan");
-      } finally {
-        setLoading(false);
-      }
+  const fetchAllJobs = useCallback(async () => {
+    try {
+      const jobsRes = await request.get("/jobs");
+      setJobs(jobsRes.data || []);
+    } catch (error) {
+      console.error("Error fetching jobs:", error);
+      toast.error("Gagal mengambil data lowongan");
     }
-
-    loadData();
   }, []);
+
+  const fetchCompany = useCallback(async () => {
+    setLoading(true);
+    try {
+      const companyRes = await request.get("/companies/me/profile");
+      const data = companyRes.data;
+
+      const transformedCompany = transformCompanyData(data);
+
+      setCompany(transformedCompany);
+    } catch (error) {
+      console.error("Error fetching company:", error);
+      toast.error("Gagal mengambil data perusahaan");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAllJobs();
+    fetchCompany();
+  }, [fetchAllJobs, fetchCompany]);
 
   const totalPosting = jobs.length;
   const stillOpen = jobs.filter(
-    (job) => job.publicationStatus === "Open"
+    (job) => job.publicationStatus === "OPEN"
   ).length;
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-gray-600">
+      <div className="min-h-screen flex items-center justify-center text-text-secondary">
         Memuat dashboard...
       </div>
     );
   }
 
-  console.log("jobs", jobs);
-  console.log(profile);
-
   return (
-    <div className="min-h-screen  p-6 mt-10">
+    <div className="min-h-screen p-6 mt-10 bg-bg">
       <HeaderCard
         title="Siap memberi banyak lowongan pekerjaan"
         subtitle="Meningkatkan kepercayaan kepada disabilitas"
       />
 
-      {profile && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4  mt-8">
-          <div className="bg-white p-6 md:col-span-2 flex justify-between items-center">
+      {company && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8">
+          <div className="bg-bg-card p-6 md:col-span-2 flex justify-between items-center rounded-lg border border-border/40">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-gray-200 overflow-hidden">
-                {profile.logoImagePath ? (
+              <div className="w-16 h-16 bg-border rounded-lg overflow-hidden flex items-center justify-center">
+                {company.logoImagePath ? (
                   <img
-                    src={profile.logoImagePath}
-                    alt="Logo"
+                    src={company.logoImagePath}
+                    alt={`Logo ${company.companyName}`}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      console.error(
+                        "Image failed to load:",
+                        company.logoImagePath
+                      );
+                      e.target.style.display = "none";
+                      e.target.parentElement.innerHTML =
+                        '<span class="text-text-secondary text-sm">Logo</span>';
+                    }}
                   />
                 ) : (
-                  <div className="w-full h-full bg-gray-300" />
+                  <span className="text-text-secondary text-sm">Logo</span>
                 )}
               </div>
 
               <div>
-                <p className="font-semibold text-gray-900">
-                  {profile.companyName}
+                <p className="font-semibold text-2xl text-text-primary">
+                  {company.companyName || "Perusahaan"}
                 </p>
-                <p className="text-gray-600 text-xs">
-                  {profile.companyDescription}
+                <p className="text-text-secondary text-xs line-clamp-2">
+                  {company.industryType}
                 </p>
               </div>
             </div>
 
             <button
-              onClick={() => router.push("/registration-company/edit")}
-              className="text-gray-600 hover:text-black"
+              onClick={() => router.push("/profile-company")}
+              className="text-text-secondary hover:text-text-primary text-lg transition-colors"
+              title="Edit Profil Perusahaan"
             >
-              ✎
+              <Edit size={20} />
             </button>
           </div>
 
-          <div className="bg-white p-6 text-center">
-            <p className="text-xl font-bold">{totalPosting}</p>
-            <p className="text-xs text-gray-600">Posting Lamaran</p>
+          <div className="bg-bg-card p-6 text-center rounded-lg border border-border/40">
+            <p className="text-3xl font-bold text-text-primary">
+              {totalPosting}
+            </p>
+            <p className="text-xs text-text-secondary">Posting Lamaran</p>
           </div>
 
-          <div className="bg-white p-6 text-center">
-            <p className="text-xl font-bold">{stillOpen}</p>
-            <p className="text-xs text-gray-600">Sedang berjalan</p>
+          <div className="bg-bg-card p-6 text-center rounded-lg border border-border/40">
+            <p className="text-3xl font-bold text-text-primary">{stillOpen}</p>
+            <p className="text-xs text-text-secondary">Sedang berjalan</p>
           </div>
         </div>
       )}
 
-      <OpenJobsSection jobs={jobs} />
-    </div>
-  );
-}
-
-function DashboardJobCard({ job }) {
-  return (
-    <div className="bg-white p-6 border border-gray-200">
-      <h3 className="text-xl font-semibold">{job.title}</h3>
-      <p className="text-gray-600 text-sm mb-3">
-        {job.companyName || "Nama Perusahaan"}
-      </p>
-
-      <div className="flex flex-wrap gap-5 text-gray-700 text-sm mb-3">
-        <div className="flex items-center gap-1">
-          <Calendar size={16} />
-          <span>
-            {job.registrationDeadline
-              ? new Date(job.registrationDeadline).toLocaleDateString("id-ID", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })
-              : "-"}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-1">
-          <Coins size={16} />
-          <span>
-            {job.salary ? `${job.salary.toLocaleString("id-ID")} / bulan` : "-"}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-1">
-          <Briefcase size={16} />
-          <span>{job.jobType || "Remote"}</span>
-        </div>
-      </div>
-
-      <p className="text-gray-700 text-sm line-clamp-3 mb-4">
-        {job.jobDescription}
-      </p>
-
-      <div className="flex gap-3">
-        <button className="border border-blue-600 text-blue-600 px-4 py-2 text-sm hover:bg-blue-50">
-          Edit Postingan
-        </button>
-        <button className="bg-blue-600 text-white px-4 py-2 text-sm hover:bg-blue-700">
-          Lihat Pelamar
-        </button>
-      </div>
-    </div>
-  );
-}
-
-/* ============================= */
-/* Open Jobs Section */
-/* ============================= */
-
-function OpenJobsSection({ jobs }) {
-  const openJobs = jobs.filter((job) => job.publicationStatus === "Open");
-
-  return (
-    <div className="bg-white p-6 mt-4">
-      <h3 className="text-lg font-semibold mb-4">Posting Lamaran Kerja</h3>
-
-      <div className="space-y-4">
-        {openJobs.map((job) => (
-          <DashboardJobCard key={job.id} job={job} />
-        ))}
-      </div>
-
-      {openJobs.length === 0 && (
-        <p className="text-gray-500 text-sm">Tidak ada lowongan terbuka.</p>
-      )}
+      <OpenJobs jobs={jobs} />
     </div>
   );
 }
